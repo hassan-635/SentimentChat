@@ -605,6 +605,154 @@ parent.Controls.Add(wrap, 2, 0);
         }
 
 
+        // ════════ SEND MESSAGE ══════════════════════════════════
+        private async Task SendMessage()
+        {
+            string text = txtInput.Text.Trim();
+            if (string.IsNullOrEmpty(text) || !btnSend.Enabled) return;
+            txtInput.Text = "";
+            btnSend.Enabled = false;
+            lblUserStatus.Text = "● PROCESSING...";
+            lblUserStatus.ForeColor = Color.Orange;
+
+            AddBubble(pnlUserChat, text, "Analyzing", true);
+            SetStatus("PROCESSING MESSAGE...");
+            Log("IN", $"USER → \"{Trunc(text, 32)}\"", "in");
+            Log("ML", "Running SdcaMaximumEntropy...", "ml");
+
+            var botTyping = AddTyping(pnlBotChat);
+
+            try
+            {
+                // 1. Analyze user message
+                var (uSent, uEmoji, uConf) = _sentimentService.Analyze(text);
+                RemoveTyping(pnlBotChat, botTyping);
+
+                // Update user side
+                AddBubble(pnlUserChat, text, uSent, true);
+                AddBubble(pnlBotChat, text, uSent, false);
+                UpdateStats(uSent);
+                Log("ML", $"USER ■ {uSent} {uEmoji} ({uConf * 100:F1}%)", uSent == "Positive" ? "pos" : uSent == "Negative" ? "neg" : "neu");
+                Log("BOT", "Forwarding to Claude API...", "bot");
+
+                // 2. Bot reply
+                await Task.Delay(500);
+                var userTyping = AddTyping(pnlUserChat);
+                string reply = await _botService.GetBotReplyAsync(text);
+                await Task.Delay(400);
+                RemoveTyping(pnlUserChat, userTyping);
+
+                // 3. Analyze bot reply
+                var (bSent, bEmoji, bConf) = _sentimentService.Analyze(reply);
+
+                AddBubble(pnlUserChat, reply, bSent, false);
+                AddBubble(pnlBotChat, reply, bSent, true);
+                UpdateStats(bSent);
+
+                Log("OUT", $"BOT → \"{Trunc(reply, 32)}\"", "out");
+                Log("ML", $"BOT ■ {bSent} {bEmoji} ({bConf * 100:F1}%)", bSent == "Positive" ? "pos" : bSent == "Negative" ? "neg" : "neu");
+                Log("──", "────────────────────────────────", "text");
+
+                SetStatus($"IDLE — TOTAL:{_total} POS:{_pos} NEG:{_neg} NEU:{_neu}");
+                lblUserStatus.Text = "● ONLINE";
+                lblUserStatus.ForeColor = GREEN;
+            }
+            catch (Exception ex)
+            {
+                RemoveTyping(pnlBotChat, botTyping);
+                Log("ERR", ex.Message, "neg");
+                SetStatus("ERROR — CHECK LOGS");
+                lblUserStatus.Text = "● ERROR";
+                lblUserStatus.ForeColor = Color.Red;
+            }
+
+            btnSend.Enabled = true;
+            txtInput.Focus();
+        }
+
+        // ════════ SERVER LOG ════════════════════════════════════
+        private void Log(string tag, string msg, string type)
+        {
+            if (flpLog.InvokeRequired) { flpLog.Invoke(() => Log(tag, msg, type)); return; }
+
+            Color c = type switch
+            {
+                "in" => Color.FromArgb(0, 170, 255),
+                "out" => Color.FromArgb(255, 170, 0),
+                "ml" => GREEN,
+                "bot" => Color.FromArgb(255, 68, 255),
+                "pos" => GREEN,
+                "neg" => Color.FromArgb(255, 68, 68),
+                "neu" => Color.FromArgb(136, 136, 136),
+                _ => Color.FromArgb(0, 180, 40)
+            };
+
+            var line = new Label
+            {
+                Text = $"[{DateTime.Now:HH:mm:ss}] [{tag}] {msg}",
+                ForeColor = c,
+                Font = new Font("Courier New", 7),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                MaximumSize = new Size(270, 0),
+                Margin = new Padding(0, 1, 0, 1)
+            };
+
+            flpLog.Controls.Add(line);
+            while (flpLog.Controls.Count > 80)
+                flpLog.Controls.RemoveAt(0);
+
+            var scroll = flpLog.Parent as Panel;
+            if (scroll != null)
+                scroll.AutoScrollPosition = new Point(0, scroll.DisplayRectangle.Height);
+        }
+
+        private void SetStatus(string text)
+        {
+            if (lblServerStatus.InvokeRequired)
+            { lblServerStatus.Invoke(() => SetStatus(text)); return; }
+            lblServerStatus.Text = text;
+        }
+
+        private void UpdateStats(string sentiment)
+        {
+            _total++;
+            if (sentiment == "Positive") _pos++;
+            else if (sentiment == "Negative") _neg++;
+            else _neu++;
+
+            void Update()
+            {
+                lblTotal.Text = _total.ToString();
+                lblPos.Text = _pos.ToString();
+                lblNeg.Text = _neg.ToString();
+                lblNeu.Text = _neu.ToString();
+            }
+
+            if (lblTotal.InvokeRequired) lblTotal.Invoke(Update);
+            else Update();
+        }
+
+        private void BootLog()
+        {
+            Task.Run(async () =>
+            {
+                await Task.Delay(600);
+                Log("BOOT", "ML.NET SdcaMaximumEntropy trainer init...", "text");
+                await Task.Delay(800);
+                Log("BOOT", "Loading training dataset...", "text");
+                await Task.Delay(900);
+                Log("BOOT", "Claude API connected", "text");
+                await Task.Delay(400);
+                Log("READY", "■ SERVER ONLINE — AWAITING MESSAGES", "pos");
+            });
+        }
+
+        private string Trunc(string s, int max) =>
+            s.Length > max ? s[..max] + "..." : s;
+
+
+
 
 
 
