@@ -549,6 +549,62 @@ parent.Controls.Add(wrap, 2, 0);
             chat.AutoScrollPosition = new Point(0, chat.DisplayRectangle.Height);
         }
 
+        // ════════ TYPING INDICATOR ═════════════════════════════
+        private Panel AddTyping(Panel chat)
+        {
+            if (chat.InvokeRequired)
+            {
+                Panel r = null!;
+                chat.Invoke(() => r = AddTyping(chat));
+                return r;
+            }
+            var wrapper = new Panel
+            {
+                Width = chat.ClientSize.Width - 12,
+                Height = 34,
+                BackColor = Color.Transparent
+            };
+
+            var bubble = new Panel
+            {
+                Size = new Size(58, 28),
+                BackColor = BUBBLE_BOT,
+                Location = new Point(4, 3)
+            };
+
+            var dots = new Label
+            {
+                Text = "● ● ●",
+                ForeColor = Color.FromArgb(134, 150, 160),
+                Font = new Font("Segoe UI", 9),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(5, 5)
+            };
+            bubble.Controls.Add(dots);
+            wrapper.Controls.Add(bubble);
+            chat.Controls.Add(wrapper);
+            chat.AutoScrollPosition = new Point(0, chat.DisplayRectangle.Height);
+
+            int frame = 0;
+            string[] frames = { "●", "● ●", "● ● ●" };
+            var t = new System.Windows.Forms.Timer { Interval = 450 };
+            t.Tick += (s, e) => { dots.Text = frames[frame++ % 3]; };
+            t.Start();
+            wrapper.Tag = t;
+
+            return wrapper;
+        }
+
+        private void RemoveTyping(Panel chat, Panel? wrapper)
+        {
+            if (wrapper == null) return;
+            if (chat.InvokeRequired) { chat.Invoke(() => RemoveTyping(chat, wrapper)); return; }
+            if (wrapper.Tag is System.Windows.Forms.Timer t) t.Stop();
+            chat.Controls.Remove(wrapper);
+        }
+
+
 
 
 
