@@ -324,7 +324,153 @@ parent.Controls.Add(wrap, 2, 0);
         footer.Controls.Add(lblServerStatus);
     }
 
-    private Label MakeStat(string val, string name, Color color, ref int x, Panel parent)
+
+        // ════════ BOT PHONE ═══════════════════════════════════
+        private void BuildBotPhone(TableLayoutPanel parent)
+        {
+            var wrap = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
+            parent.Controls.Add(wrap, 4, 0);
+            var lbl = new Label
+            {
+                Text = "// AI_BOT_DEVICE",
+                ForeColor = GREEN,
+                Font = new Font("Courier New", 8, FontStyle.Bold),
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                Location = new Point(0, 4)
+            };
+            wrap.Controls.Add(lbl);
+
+            var phone = MakePhone();
+            phone.Location = new Point(0, 24);
+            wrap.Controls.Add(phone);
+
+            // Header
+            var header = new Panel
+            {
+                Height = 58,
+                Dock = DockStyle.Top,
+                BackColor = HEADER_BG,
+                Padding = new Padding(10, 8, 0, 0)
+            };
+            phone.Controls.Add(header);
+            header.Controls.Add(MakeAvatar("👤", Color.FromArgb(42, 57, 66)));
+
+            header.Controls.Add(new Label
+            {
+                Text = "User",
+                ForeColor = TEXT_CLR,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(52, 9)
+            });
+            header.Controls.Add(new Label
+            {
+                Text = "● ONLINE",
+                ForeColor = GREEN,
+                Font = new Font("Courier New", 7),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(52, 28)
+            });
+
+            // Chat area
+            pnlBotChat = new Panel
+            {
+                BackColor = Color.FromArgb(12, 20, 25),
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                Padding = new Padding(5)
+            };
+            phone.Controls.Add(pnlBotChat);
+
+            // Disabled input (bot side — read only)
+            var inputBar = new Panel
+            {
+                Height = 50,
+                Dock = DockStyle.Bottom,
+                BackColor = HEADER_BG,
+                Enabled = false,
+                Padding = new Padding(7)
+            };
+            phone.Controls.Add(inputBar);
+            inputBar.Controls.Add(new TextBox
+            {
+                BackColor = Color.FromArgb(42, 57, 66),
+                ForeColor = Color.FromArgb(80, 80, 80),
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 10),
+                Width = 168,
+                Location = new Point(7, 12),
+                Text = "AI is typing...",
+                ReadOnly = true
+            });
+        }
+
+        // ════════ ARROWS ══════════════════════════════════════
+        private void BuildArrow(TableLayoutPanel parent, int col)
+        {
+            var pnl = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
+            parent.Controls.Add(pnl, col, 0);
+
+            var lbl = new Label
+            {
+                Text = "→\n\n←",
+                ForeColor = Color.FromArgb(0, 80, 20),
+                Font = new Font("Courier New", 14, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                BackColor = Color.Transparent,
+                Dock = DockStyle.Fill
+            };
+            pnl.Controls.Add(lbl);
+
+            bool vis = true;
+            var t = new System.Windows.Forms.Timer { Interval = 900 };
+            t.Tick += (s, e) =>
+            {
+                lbl.ForeColor = vis ? Color.FromArgb(0, 80, 20) : Color.FromArgb(0, 30, 8);
+                vis = !vis;
+            };
+            t.Start();
+        }
+
+        // ════════ HELPERS ══════════════════════════════════════
+        private Panel MakePhone()
+        {
+            var p = new Panel { Size = new Size(252, 562), BackColor = PHONE_BG };
+            p.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using var pen = new Pen(Color.FromArgb(40, 40, 40), 2);
+                e.Graphics.DrawRectangle(pen, new Rectangle(1, 1, p.Width - 2, p.Height - 2));
+                using var nb = new SolidBrush(Color.Black);
+                e.Graphics.FillRectangle(nb, p.Width / 2 - 32, 0, 64, 16);
+            };
+            return p;
+        }
+
+        private Panel MakeAvatar(string emoji, Color bg)
+        {
+            var p = new Panel { Size = new Size(36, 36), Location = new Point(10, 11), BackColor = bg };
+            var gp = new System.Drawing.Drawing2D.GraphicsPath();
+            gp.AddEllipse(0, 0, 36, 36);
+            p.Region = new Region(gp);
+            p.Controls.Add(new Label
+            {
+                Text = emoji,
+                Font = new Font("Segoe UI Emoji", 14),
+                BackColor = Color.Transparent,
+                ForeColor = Color.White,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Fill
+            });
+            return p;
+        }
+
+
+
+        private Label MakeStat(string val, string name, Color color, ref int x, Panel parent)
     {
         var valLbl = new Label
         {
