@@ -74,6 +74,134 @@ namespace SentimentChat
             }
         }
 
+        private void BuildUI()
+        {
+            var mainLayout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.Transparent,
+                ColumnCount = 5,
+                RowCount = 1,
+                Padding = new Padding(18, 14, 18, 14)
+            };
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 255));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 48));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 298));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 48));
+            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 255));
+            this.Controls.Add(mainLayout);
+            mainLayout.BringToFront();
+            BuildUserPhone(mainLayout);
+            BuildArrow(mainLayout, 1);
+            BuildServer(mainLayout);
+            BuildArrow(mainLayout, 3);
+            BuildBotPhone(mainLayout);
+        }
+
+        // ════════ USER PHONE ══════════════════════════════════
+        private void BuildUserPhone(TableLayoutPanel parent)
+        {
+            var wrap = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
+            parent.Controls.Add(wrap, 0, 0);
+
+            var lbl = new Label
+            {
+                Text = "// USER_DEVICE",
+                ForeColor = GREEN,
+                Font = new Font("Courier New", 8, FontStyle.Bold),
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                Location = new Point(0, 4)
+            };
+            wrap.Controls.Add(lbl);
+
+            var phone = MakePhone();
+            phone.Location = new Point(0, 24);
+            wrap.Controls.Add(phone);
+
+            // Header
+            var header = new Panel
+            {
+                Height = 58,
+                Dock = DockStyle.Top,
+                BackColor = HEADER_BG,
+                Padding = new Padding(10, 8, 0, 0)
+            };
+            phone.Controls.Add(header);
+            header.Controls.Add(MakeAvatar("🤖", Color.FromArgb(0, 92, 75)));
+
+            header.Controls.Add(new Label
+            {
+                Text = "AI Bot",
+                ForeColor = TEXT_CLR,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(52, 9)
+            });
+
+            lblUserStatus = new Label
+            {
+                Text = "● ONLINE",
+                ForeColor = GREEN,
+                Font = new Font("Courier New", 7),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(52, 28)
+            };
+            header.Controls.Add(lblUserStatus);
+
+            // Chat area
+            pnlUserChat = new Panel
+            {
+                BackColor = Color.FromArgb(12, 20, 25),
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                Padding = new Padding(5)
+            };
+            phone.Controls.Add(pnlUserChat);
+
+            // Input bar
+            var inputBar = new Panel
+            {
+                Height = 50,
+                Dock = DockStyle.Bottom,
+                BackColor = HEADER_BG,
+                Padding = new Padding(7)
+            };
+            phone.Controls.Add(inputBar);
+
+            txtInput = new TextBox
+            {
+                BackColor = Color.FromArgb(42, 57, 66),
+                ForeColor = TEXT_CLR,
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 10),
+                Width = 168,
+                Location = new Point(7, 12)
+            };
+            txtInput.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; _ = SendMessage(); }
+            };
+            inputBar.Controls.Add(txtInput);
+
+            btnSend = new Button
+            {
+                Text = "➤",
+                BackColor = GREEN,
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(36, 36),
+                Location = new Point(182, 7),
+                Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            };
+            btnSend.FlatAppearance.BorderSize = 0;
+            btnSend.Click += async (s, e) => await SendMessage();
+            inputBar.Controls.Add(btnSend);
+        }
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             _matrixTimer?.Stop();
