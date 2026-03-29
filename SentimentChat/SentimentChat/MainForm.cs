@@ -202,6 +202,155 @@ namespace SentimentChat
             inputBar.Controls.Add(btnSend);
         }
 
+        private void BuildServer(TableLayoutPanel parent)
+{
+var wrap = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
+parent.Controls.Add(wrap, 2, 0);
+        var lbl = new Label
+        {
+            Text      = "// SENTIMENT_SERVER",
+            ForeColor = GREEN,
+            Font      = new Font("Courier New", 8, FontStyle.Bold),
+            AutoSize  = true,
+            BackColor = Color.Transparent,
+            Location  = new Point(0, 4)
+        };
+        wrap.Controls.Add(lbl);
+
+        var server = new Panel
+        {
+            Size      = new Size(293, 568),
+            Location  = new Point(0, 24),
+            BackColor = SERVER_BG
+        };
+        server.Paint += (s, e) =>
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using var pen  = new Pen(GREEN, 1);
+            using var glow = new Pen(Color.FromArgb(25, 0, 255, 65), 6);
+            var r = new Rectangle(1, 1, server.Width - 2, server.Height - 2);
+            e.Graphics.DrawRectangle(glow, r);
+            e.Graphics.DrawRectangle(pen, r);
+        };
+        wrap.Controls.Add(server);
+
+        // Header
+        var hdr = new Panel
+        {
+            Height    = 34,
+            Dock      = DockStyle.Top,
+            BackColor = Color.FromArgb(0, 26, 0)
+        };
+        server.Controls.Add(hdr);
+        hdr.Controls.Add(new Label
+        {
+            Text      = "▶ SENTIMENT_ANALYSIS_NODE  v1.0",
+            ForeColor = GREEN,
+            Font      = new Font("Courier New", 8, FontStyle.Bold),
+            BackColor = Color.Transparent,
+            AutoSize  = true,
+            Location  = new Point(10, 10)
+        });
+
+        // Stats row
+        var statsRow = new Panel
+        {
+            Height    = 48,
+            Dock      = DockStyle.Top,
+            BackColor = Color.FromArgb(2, 13, 2)
+        };
+        server.Controls.Add(statsRow);
+
+        int sx = 14;
+        lblTotal = MakeStat("0", "TOTAL",    GREEN,                        ref sx, statsRow);
+        lblPos   = MakeStat("0", "POSITIVE", GREEN,                        ref sx, statsRow);
+        lblNeg   = MakeStat("0", "NEGATIVE", Color.FromArgb(255, 68, 68),  ref sx, statsRow);
+        lblNeu   = MakeStat("0", "NEUTRAL",  Color.FromArgb(170,170,170),  ref sx, statsRow);
+
+        // Log area
+        var logScroll = new Panel
+        {
+            Dock       = DockStyle.Fill,
+            BackColor  = Color.Transparent,
+            AutoScroll = true,
+            Padding    = new Padding(6, 4, 6, 4)
+        };
+        server.Controls.Add(logScroll);
+
+        flpLog = new FlowLayoutPanel
+        {
+            FlowDirection  = FlowDirection.TopDown,
+            WrapContents   = false,
+            AutoSize       = true,
+            AutoSizeMode   = AutoSizeMode.GrowAndShrink,
+            BackColor      = Color.Transparent,
+            Width          = 272
+        };
+        logScroll.Controls.Add(flpLog);
+
+        // Footer
+        var footer = new Panel
+        {
+            Height    = 26,
+            Dock      = DockStyle.Bottom,
+            BackColor = Color.FromArgb(0, 26, 0)
+        };
+        server.Controls.Add(footer);
+
+        var dot = new Panel
+        {
+            Size      = new Size(8, 8),
+            Location  = new Point(10, 9),
+            BackColor = GREEN
+        };
+        var dp = new System.Drawing.Drawing2D.GraphicsPath();
+        dp.AddEllipse(0, 0, 8, 8);
+        dot.Region = new Region(dp);
+        footer.Controls.Add(dot);
+
+        var blinkTimer = new System.Windows.Forms.Timer { Interval = 700 };
+        blinkTimer.Tick += (s, e) => dot.Visible = !dot.Visible;
+        blinkTimer.Start();
+
+        lblServerStatus = new Label
+        {
+            Text      = "IDLE — MONITORING TRAFFIC",
+            ForeColor = DIM_GREEN,
+            Font      = new Font("Courier New", 7),
+            BackColor = Color.Transparent,
+            AutoSize  = true,
+            Location  = new Point(24, 7)
+        };
+        footer.Controls.Add(lblServerStatus);
+    }
+
+    private Label MakeStat(string val, string name, Color color, ref int x, Panel parent)
+    {
+        var valLbl = new Label
+        {
+            Text      = val,
+            ForeColor = color,
+            Font      = new Font("Courier New", 13, FontStyle.Bold),
+            BackColor = Color.Transparent,
+            AutoSize  = true,
+            Location  = new Point(x, 4)
+        };
+        var namLbl = new Label
+        {
+            Text      = name,
+            ForeColor = DIM_GREEN,
+            Font      = new Font("Courier New", 6),
+            BackColor = Color.Transparent,
+            AutoSize  = true,
+            Location  = new Point(x, 24)
+        };
+        parent.Controls.Add(valLbl);
+        parent.Controls.Add(namLbl);
+        x += 64;
+        return valLbl;
+    }
+
+
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             _matrixTimer?.Stop();
