@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SentimentChat", "SentimentChat\SentimentChat.csproj", "{A918B60E-A073-4A95-9BB5-368785948B3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A918B60E-A073-4A95-9BB5-368785948B3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A918B60E-A073-4A95-9BB5-368785948B3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A918B60E-A073-4A95-9BB5-368785948B3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A918B60E-A073-4A95-9BB5-368785948B3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AC547549-81ED-4462-9F8F-392A65F4980F}
+	EndGlobalSection
+EndGlobal
