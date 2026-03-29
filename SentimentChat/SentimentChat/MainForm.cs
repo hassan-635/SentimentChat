@@ -467,6 +467,88 @@ parent.Controls.Add(wrap, 2, 0);
             });
             return p;
         }
+        // ════════ CHAT BUBBLE ══════════════════════════════════
+        private void AddBubble(Panel chat, string text, string sentiment, bool isSent)
+        {
+            if (chat.InvokeRequired) { chat.Invoke(() => AddBubble(chat, text, sentiment, isSent)); return; }
+            Color sentColor = sentiment switch
+            {
+                "Positive" => GREEN,
+                "Negative" => Color.FromArgb(255, 68, 68),
+                _ => Color.FromArgb(170, 170, 170)
+            };
+
+            string emoji = sentiment switch
+            {
+                "Positive" => "😊",
+                "Negative" => "😡",
+                _ => "😌"
+            };
+
+            var wrapper = new Panel
+            {
+                Width = chat.ClientSize.Width - 12,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                BackColor = Color.Transparent,
+                Margin = new Padding(0, 2, 0, 2)
+            };
+
+            var bubble = new Panel
+            {
+                BackColor = isSent ? BUBBLE_USER : BUBBLE_BOT,
+                Padding = new Padding(8, 6, 8, 20),
+                MaximumSize = new Size(200, 0),
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
+            };
+
+            bubble.Controls.Add(new Label
+            {
+                Text = $"{sentiment.ToUpper()}",
+                ForeColor = sentColor,
+                Font = new Font("Courier New", 7, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(4, 4)
+            });
+
+            bubble.Controls.Add(new Label
+            {
+                Text = $"{emoji} {text}",
+                ForeColor = TEXT_CLR,
+                Font = new Font("Segoe UI", 10),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                MaximumSize = new Size(180, 0),
+                Location = new Point(4, 18)
+            });
+
+            bubble.Controls.Add(new Label
+            {
+                Text = DateTime.Now.ToString("HH:mm"),
+                ForeColor = Color.FromArgb(134, 150, 160),
+                Font = new Font("Courier New", 7),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(4, bubble.Height - 16)
+            });
+
+            wrapper.Controls.Add(bubble);
+
+            wrapper.SizeChanged += (s, e) =>
+            {
+                bubble.Left = isSent ? wrapper.Width - bubble.Width - 4 : 4;
+                // fix time label position
+                foreach (Control c in bubble.Controls)
+                    if (c is Label l && l.Font.Size == 7 && l.Text.Contains(":"))
+                        l.Location = new Point(bubble.Width - l.Width - 8, bubble.Height - l.Height - 2);
+            };
+
+            chat.Controls.Add(wrapper);
+            chat.AutoScrollPosition = new Point(0, chat.DisplayRectangle.Height);
+        }
+
 
 
 
