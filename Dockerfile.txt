@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0-windowsservercore-ltsc2022 AS build
+WORKDIR /src
+COPY SentimentChat/SentimentChat.csproj ./SentimentChat/
+RUN dotnet restore "./SentimentChat/SentimentChat.csproj"
+COPY . .
+WORKDIR /src/SentimentChat
+RUN dotnet publish "SentimentChat.csproj" -c Release -o /app/publish --no-restore
+FROM mcr.microsoft.com/dotnet/runtime:8.0-windowsservercore-ltsc2022 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+ENV CLAUDE_API_KEY=""
+ENTRYPOINT ["SentimentChat.exe"]
