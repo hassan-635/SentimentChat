@@ -1,58 +1,60 @@
-﻿using SentimentChat;
-using SentimentChat.Services;
+﻿using SentimentChat.Services;
 using System.Drawing.Drawing2D;
+
 namespace SentimentChat
 {
     public partial class MainForm : Form
     {
-        // ── Services ─────────────────────────────────────────
+        // ── Services ──────────────────────────────────────────────────────
         private SentimentService _sentimentService = null!;
         private BotService _botService = null!;
-        // ── Stats ─────────────────────────────────────────────
+
+        // ── Stats ─────────────────────────────────────────────────────────
         private int _total = 0, _pos = 0, _neg = 0, _neu = 0;
 
-        // ── Colors ────────────────────────────────────────────
-        private readonly Color GREEN = Color.FromArgb(0, 255, 65);
-        private readonly Color DARK_GREEN = Color.FromArgb(0, 204, 51);
-        private readonly Color DIM_GREEN = Color.FromArgb(0, 51, 0);
-        private readonly Color BG = Color.FromArgb(10, 10, 10);
-        private readonly Color PHONE_BG = Color.FromArgb(17, 17, 17);
-        private readonly Color HEADER_BG = Color.FromArgb(31, 44, 52);
-        private readonly Color BUBBLE_USER = Color.FromArgb(0, 92, 75);
-        private readonly Color BUBBLE_BOT = Color.FromArgb(32, 44, 51);
-        private readonly Color TEXT_CLR = Color.FromArgb(233, 237, 239);
-        private readonly Color SERVER_BG = Color.FromArgb(5, 15, 5);
+        // ── Colors ────────────────────────────────────────────────────────
+        private static readonly Color GREEN = Color.FromArgb(0, 255, 65);
+        private static readonly Color DIM_GREEN = Color.FromArgb(0, 110, 30);
+        private static readonly Color BG = Color.FromArgb(8, 8, 8);
+        private static readonly Color PHONE_BG = Color.FromArgb(18, 18, 18);
+        private static readonly Color HEADER_BG = Color.FromArgb(28, 40, 48);
+        private static readonly Color CHAT_BG = Color.FromArgb(11, 18, 23);
+        private static readonly Color BUBBLE_USER = Color.FromArgb(0, 92, 75);
+        private static readonly Color BUBBLE_BOT = Color.FromArgb(32, 44, 51);
+        private static readonly Color TEXT_CLR = Color.FromArgb(233, 237, 239);
+        private static readonly Color SERVER_BG = Color.FromArgb(4, 12, 4);
 
-        // ── Matrix Rain ───────────────────────────────────────
+        // ── Matrix rain ────────────────────────────────────────────────── 
         private System.Windows.Forms.Timer _matrixTimer = null!;
-        private Bitmap _matrixBitmap = null!;
+        private Bitmap _matrixBmp = null!;
         private Graphics _matrixGfx = null!;
         private float[] _drops = null!;
-        private readonly Random _rnd = new Random();
-        private const string MATRIX_CHARS = "アイウエオカキクケコ01アイウエオ";
+        private readonly Random _rnd = new();
+        private const string MATRIX_CHARS = "アイウエオカキクケコ01アイウエオ10ウカ";
 
-        // ── UI Refs ───────────────────────────────────────────
+        // ── UI refs ───────────────────────────────────────────────────────
         private Panel pnlUserChat = null!;
         private Panel pnlBotChat = null!;
         private TextBox txtInput = null!;
         private Button btnSend = null!;
+        private Label lblUserStatus = null!;
         private Label lblServerStatus = null!;
-        private Label lblTotal = null!, lblPos = null!, lblNeg = null!, lblNeu = null!;
+        private Label lblTotal = null!, lblPos = null!,
+                                lblNeg = null!, lblNeu = null!;
         private FlowLayoutPanel flpLog = null!;
         private PictureBox pbxMatrix = null!;
-        private Label lblUserStatus = null!;
 
+        // ══════════════════════════════════════════════════════════════════
         public MainForm()
         {
             InitializeComponent();
-
-            this.Text = "SentimentChat — WhatsApp Sentiment Simulator";
-            this.Size = new Size(1120, 680);
-            this.MinimumSize = new Size(1120, 680);
-            this.BackColor = BG;
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
-            this.MaximizeBox = false;
+            Text = "SentimentChat  —  WhatsApp Sentiment Simulator";
+            Size = new Size(1420, 840);
+            MinimumSize = new Size(1420, 840);
+            BackColor = BG;
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
 
             InitServices();
             BuildUI();
@@ -60,6 +62,7 @@ namespace SentimentChat
             BootLog();
         }
 
+        // ─────────────────────────────────────────────────────────────────
         private void InitServices()
         {
             try
@@ -69,122 +72,92 @@ namespace SentimentChat
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Startup Error:\n{ex.Message}", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Startup error:\n\n{ex.Message}",
+                    "Init Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // ══════════════════ LAYOUT ════════════════════════════════════════
         private void BuildUI()
         {
-            var mainLayout = new TableLayoutPanel
+            var root = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.Transparent,
                 ColumnCount = 5,
                 RowCount = 1,
-                Padding = new Padding(18, 14, 18, 14)
+                Padding = new Padding(24, 18, 24, 18)
             };
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 255));
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 48));
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 298));
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 48));
-            mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 255));
-            this.Controls.Add(mainLayout);
-            mainLayout.BringToFront();
-            BuildUserPhone(mainLayout);
-            BuildArrow(mainLayout, 1);
-            BuildServer(mainLayout);
-            BuildArrow(mainLayout, 3);
-            BuildBotPhone(mainLayout);
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 320));
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 58));
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 398));
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 58));
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 320));
+
+            Controls.Add(root);
+            root.BringToFront();
+
+            BuildUserPhone(root);
+            BuildArrow(root, 1);
+            BuildServer(root);
+            BuildArrow(root, 3);
+            BuildBotPhone(root);
         }
 
-        // ════════ USER PHONE ══════════════════════════════════
+        // ══════════════════ USER PHONE ════════════════════════════════════
         private void BuildUserPhone(TableLayoutPanel parent)
         {
             var wrap = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
             parent.Controls.Add(wrap, 0, 0);
+            wrap.Controls.Add(DeviceLabel("// USER_DEVICE"));
 
-            var lbl = new Label
-            {
-                Text = "// USER_DEVICE",
-                ForeColor = GREEN,
-                Font = new Font("Courier New", 8, FontStyle.Bold),
-                AutoSize = true,
-                BackColor = Color.Transparent,
-                Location = new Point(0, 4)
-            };
-            wrap.Controls.Add(lbl);
-
-            var phone = MakePhone();
-            phone.Location = new Point(0, 24);
+            var phone = PhoneFrame(318, 730);
+            phone.Location = new Point(0, 26);
             wrap.Controls.Add(phone);
 
-            // Header
-            var header = new Panel
-            {
-                Height = 58,
-                Dock = DockStyle.Top,
-                BackColor = HEADER_BG,
-                Padding = new Padding(10, 8, 0, 0)
-            };
-            phone.Controls.Add(header);
-            header.Controls.Add(MakeAvatar("🤖", Color.FromArgb(0, 92, 75)));
-
-            header.Controls.Add(new Label
+            var hdr = new Panel { Height = 68, Dock = DockStyle.Top, BackColor = HEADER_BG };
+            phone.Controls.Add(hdr);
+            hdr.Controls.Add(CircleAvatar("AI", Color.FromArgb(0, 100, 82)));
+            hdr.Controls.Add(new Label
             {
                 Text = "AI Bot",
                 ForeColor = TEXT_CLR,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Font = new Font("Segoe UI", 13, FontStyle.Bold),
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                Location = new Point(52, 9)
+                Location = new Point(62, 11)
             });
-
             lblUserStatus = new Label
             {
                 Text = "● ONLINE",
                 ForeColor = GREEN,
-                Font = new Font("Courier New", 7),
+                Font = new Font("Courier New", 9, FontStyle.Bold),
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                Location = new Point(52, 28)
+                Location = new Point(62, 36)
             };
-            header.Controls.Add(lblUserStatus);
+            hdr.Controls.Add(lblUserStatus);
 
-            // Chat area
-            pnlUserChat = new Panel
-            {
-                BackColor = Color.FromArgb(12, 20, 25),
-                Dock = DockStyle.Fill,
-                AutoScroll = true,
-                Padding = new Padding(5)
-            };
+            pnlUserChat = MakeChatArea();
             phone.Controls.Add(pnlUserChat);
 
-            // Input bar
-            var inputBar = new Panel
-            {
-                Height = 50,
-                Dock = DockStyle.Bottom,
-                BackColor = HEADER_BG,
-                Padding = new Padding(7)
-            };
-            phone.Controls.Add(inputBar);
-
+            var bar = MakeInputBar(phone);
             txtInput = new TextBox
             {
                 BackColor = Color.FromArgb(42, 57, 66),
                 ForeColor = TEXT_CLR,
                 BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 10),
-                Width = 168,
-                Location = new Point(7, 12)
+                Font = new Font("Segoe UI", 12),
+                Width = 220,
+                Height = 36,
+                Location = new Point(10, 12)
             };
             txtInput.KeyDown += (s, e) =>
             {
-                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; _ = SendMessage(); }
+                if (e.KeyCode == Keys.Enter)
+                { e.SuppressKeyPress = true; _ = SendMessage(); }
             };
-            inputBar.Controls.Add(txtInput);
+            bar.Controls.Add(txtInput);
 
             btnSend = new Button
             {
@@ -192,274 +165,229 @@ namespace SentimentChat
                 BackColor = GREEN,
                 ForeColor = Color.Black,
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(36, 36),
-                Location = new Point(182, 7),
+                Size = new Size(46, 42),
+                Location = new Point(240, 10),
                 Cursor = Cursors.Hand,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                Font = new Font("Segoe UI", 13, FontStyle.Bold)
             };
             btnSend.FlatAppearance.BorderSize = 0;
             btnSend.Click += async (s, e) => await SendMessage();
-            inputBar.Controls.Add(btnSend);
+            bar.Controls.Add(btnSend);
         }
 
+        // ══════════════════ SERVER ════════════════════════════════════════
         private void BuildServer(TableLayoutPanel parent)
-{
-var wrap = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
-parent.Controls.Add(wrap, 2, 0);
-        var lbl = new Label
         {
-            Text      = "// SENTIMENT_SERVER",
-            ForeColor = GREEN,
-            Font      = new Font("Courier New", 8, FontStyle.Bold),
-            AutoSize  = true,
-            BackColor = Color.Transparent,
-            Location  = new Point(0, 4)
-        };
-        wrap.Controls.Add(lbl);
+            var wrap = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
+            parent.Controls.Add(wrap, 2, 0);
+            wrap.Controls.Add(DeviceLabel("// SENTIMENT_SERVER"));
 
-        var server = new Panel
-        {
-            Size      = new Size(293, 568),
-            Location  = new Point(0, 24),
-            BackColor = SERVER_BG
-        };
-        server.Paint += (s, e) =>
-        {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var pen  = new Pen(GREEN, 1);
-            using var glow = new Pen(Color.FromArgb(25, 0, 255, 65), 6);
-            var r = new Rectangle(1, 1, server.Width - 2, server.Height - 2);
-            e.Graphics.DrawRectangle(glow, r);
-            e.Graphics.DrawRectangle(pen, r);
-        };
-        wrap.Controls.Add(server);
+            var srv = new Panel
+            {
+                Size = new Size(393, 730),
+                Location = new Point(0, 26),
+                BackColor = SERVER_BG
+            };
+            srv.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using var glow = new Pen(Color.FromArgb(28, 0, 255, 65), 8);
+                using var line = new Pen(GREEN, 1);
+                var r = new Rectangle(1, 1, srv.Width - 2, srv.Height - 2);
+                e.Graphics.DrawRectangle(glow, r);
+                e.Graphics.DrawRectangle(line, r);
+            };
+            wrap.Controls.Add(srv);
 
-        // Header
-        var hdr = new Panel
-        {
-            Height    = 34,
-            Dock      = DockStyle.Top,
-            BackColor = Color.FromArgb(0, 26, 0)
-        };
-        server.Controls.Add(hdr);
-        hdr.Controls.Add(new Label
-        {
-            Text      = "▶ SENTIMENT_ANALYSIS_NODE  v1.0",
-            ForeColor = GREEN,
-            Font      = new Font("Courier New", 8, FontStyle.Bold),
-            BackColor = Color.Transparent,
-            AutoSize  = true,
-            Location  = new Point(10, 10)
-        });
+            var titleBar = new Panel
+            {
+                Height = 40,
+                Dock = DockStyle.Top,
+                BackColor = Color.FromArgb(0, 20, 0)
+            };
+            srv.Controls.Add(titleBar);
+            titleBar.Controls.Add(new Label
+            {
+                Text = "▶  SENTIMENT_ANALYSIS_NODE   v2.0",
+                ForeColor = GREEN,
+                Font = new Font("Courier New", 9, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(10, 11)
+            });
 
-        // Stats row
-        var statsRow = new Panel
-        {
-            Height    = 48,
-            Dock      = DockStyle.Top,
-            BackColor = Color.FromArgb(2, 13, 2)
-        };
-        server.Controls.Add(statsRow);
+            var statsRow = new Panel
+            {
+                Height = 62,
+                Dock = DockStyle.Top,
+                BackColor = Color.FromArgb(2, 12, 2)
+            };
+            srv.Controls.Add(statsRow);
+            int sx = 14;
+            lblTotal = StatLabel("0", "TOTAL", GREEN, ref sx, statsRow);
+            lblPos = StatLabel("0", "POSITIVE", Color.FromArgb(0, 220, 60), ref sx, statsRow);
+            lblNeg = StatLabel("0", "NEGATIVE", Color.FromArgb(255, 70, 70), ref sx, statsRow);
+            lblNeu = StatLabel("0", "NEUTRAL", Color.FromArgb(160, 160, 160), ref sx, statsRow);
 
-        int sx = 14;
-        lblTotal = MakeStat("0", "TOTAL",    GREEN,                        ref sx, statsRow);
-        lblPos   = MakeStat("0", "POSITIVE", GREEN,                        ref sx, statsRow);
-        lblNeg   = MakeStat("0", "NEGATIVE", Color.FromArgb(255, 68, 68),  ref sx, statsRow);
-        lblNeu   = MakeStat("0", "NEUTRAL",  Color.FromArgb(170,170,170),  ref sx, statsRow);
+            var logScroll = new Panel
+            {
+                Dock = DockStyle.Fill,
+                AutoScroll = true,
+                BackColor = Color.Transparent,
+                Padding = new Padding(8, 6, 8, 6)
+            };
+            srv.Controls.Add(logScroll);
 
-        // Log area
-        var logScroll = new Panel
-        {
-            Dock       = DockStyle.Fill,
-            BackColor  = Color.Transparent,
-            AutoScroll = true,
-            Padding    = new Padding(6, 4, 6, 4)
-        };
-        server.Controls.Add(logScroll);
+            flpLog = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                BackColor = Color.Transparent,
+                Width = 368
+            };
+            logScroll.Controls.Add(flpLog);
 
-        flpLog = new FlowLayoutPanel
-        {
-            FlowDirection  = FlowDirection.TopDown,
-            WrapContents   = false,
-            AutoSize       = true,
-            AutoSizeMode   = AutoSizeMode.GrowAndShrink,
-            BackColor      = Color.Transparent,
-            Width          = 272
-        };
-        logScroll.Controls.Add(flpLog);
+            var footer = new Panel
+            {
+                Height = 30,
+                Dock = DockStyle.Bottom,
+                BackColor = Color.FromArgb(0, 20, 0)
+            };
+            srv.Controls.Add(footer);
 
-        // Footer
-        var footer = new Panel
-        {
-            Height    = 26,
-            Dock      = DockStyle.Bottom,
-            BackColor = Color.FromArgb(0, 26, 0)
-        };
-        server.Controls.Add(footer);
+            var dot = new Panel { Size = new Size(10, 10), Location = new Point(10, 10), BackColor = GREEN };
+            var gp = new GraphicsPath(); gp.AddEllipse(0, 0, 10, 10);
+            dot.Region = new Region(gp);
+            footer.Controls.Add(dot);
 
-        var dot = new Panel
-        {
-            Size      = new Size(8, 8),
-            Location  = new Point(10, 9),
-            BackColor = GREEN
-        };
-        var dp = new System.Drawing.Drawing2D.GraphicsPath();
-        dp.AddEllipse(0, 0, 8, 8);
-        dot.Region = new Region(dp);
-        footer.Controls.Add(dot);
+            var blink = new System.Windows.Forms.Timer { Interval = 700 };
+            blink.Tick += (s, e) => dot.Visible = !dot.Visible;
+            blink.Start();
 
-        var blinkTimer = new System.Windows.Forms.Timer { Interval = 700 };
-        blinkTimer.Tick += (s, e) => dot.Visible = !dot.Visible;
-        blinkTimer.Start();
+            lblServerStatus = new Label
+            {
+                Text = "IDLE — MONITORING TRAFFIC",
+                ForeColor = DIM_GREEN,
+                Font = new Font("Courier New", 8),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(28, 8)
+            };
+            footer.Controls.Add(lblServerStatus);
+        }
 
-        lblServerStatus = new Label
-        {
-            Text      = "IDLE — MONITORING TRAFFIC",
-            ForeColor = DIM_GREEN,
-            Font      = new Font("Courier New", 7),
-            BackColor = Color.Transparent,
-            AutoSize  = true,
-            Location  = new Point(24, 7)
-        };
-        footer.Controls.Add(lblServerStatus);
-    }
-
-
-        // ════════ BOT PHONE ═══════════════════════════════════
+        // ══════════════════ BOT PHONE ═════════════════════════════════════
         private void BuildBotPhone(TableLayoutPanel parent)
         {
             var wrap = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
             parent.Controls.Add(wrap, 4, 0);
-            var lbl = new Label
-            {
-                Text = "// AI_BOT_DEVICE",
-                ForeColor = GREEN,
-                Font = new Font("Courier New", 8, FontStyle.Bold),
-                AutoSize = true,
-                BackColor = Color.Transparent,
-                Location = new Point(0, 4)
-            };
-            wrap.Controls.Add(lbl);
+            wrap.Controls.Add(DeviceLabel("// AI_BOT_DEVICE"));
 
-            var phone = MakePhone();
-            phone.Location = new Point(0, 24);
+            var phone = PhoneFrame(318, 730);
+            phone.Location = new Point(0, 26);
             wrap.Controls.Add(phone);
 
-            // Header
-            var header = new Panel
-            {
-                Height = 58,
-                Dock = DockStyle.Top,
-                BackColor = HEADER_BG,
-                Padding = new Padding(10, 8, 0, 0)
-            };
-            phone.Controls.Add(header);
-            header.Controls.Add(MakeAvatar("👤", Color.FromArgb(42, 57, 66)));
-
-            header.Controls.Add(new Label
+            var hdr = new Panel { Height = 68, Dock = DockStyle.Top, BackColor = HEADER_BG };
+            phone.Controls.Add(hdr);
+            hdr.Controls.Add(CircleAvatar("U", Color.FromArgb(42, 57, 66)));
+            hdr.Controls.Add(new Label
             {
                 Text = "User",
                 ForeColor = TEXT_CLR,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                Font = new Font("Segoe UI", 13, FontStyle.Bold),
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                Location = new Point(52, 9)
+                Location = new Point(62, 11)
             });
-            header.Controls.Add(new Label
+            hdr.Controls.Add(new Label
             {
                 Text = "● ONLINE",
                 ForeColor = GREEN,
-                Font = new Font("Courier New", 7),
+                Font = new Font("Courier New", 9, FontStyle.Bold),
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                Location = new Point(52, 28)
+                Location = new Point(62, 36)
             });
 
-            // Chat area
-            pnlBotChat = new Panel
-            {
-                BackColor = Color.FromArgb(12, 20, 25),
-                Dock = DockStyle.Fill,
-                AutoScroll = true,
-                Padding = new Padding(5)
-            };
+            pnlBotChat = MakeChatArea();
             phone.Controls.Add(pnlBotChat);
 
-            // Disabled input (bot side — read only)
-            var inputBar = new Panel
+            var bar = MakeInputBar(phone);
+            bar.Enabled = false;
+            bar.Controls.Add(new TextBox
             {
-                Height = 50,
-                Dock = DockStyle.Bottom,
-                BackColor = HEADER_BG,
-                Enabled = false,
-                Padding = new Padding(7)
-            };
-            phone.Controls.Add(inputBar);
-            inputBar.Controls.Add(new TextBox
-            {
-                BackColor = Color.FromArgb(42, 57, 66),
-                ForeColor = Color.FromArgb(80, 80, 80),
+                BackColor = Color.FromArgb(32, 44, 50),
+                ForeColor = Color.FromArgb(80, 90, 100),
                 BorderStyle = BorderStyle.None,
-                Font = new Font("Segoe UI", 10),
-                Width = 168,
-                Location = new Point(7, 12),
+                Font = new Font("Segoe UI", 12),
+                Width = 220,
+                Location = new Point(10, 12),
                 Text = "AI is typing...",
                 ReadOnly = true
             });
         }
 
-        // ════════ ARROWS ══════════════════════════════════════
+        // ══════════════════ ARROWS ════════════════════════════════════════
         private void BuildArrow(TableLayoutPanel parent, int col)
         {
             var pnl = new Panel { BackColor = Color.Transparent, Dock = DockStyle.Fill };
             parent.Controls.Add(pnl, col, 0);
-
             var lbl = new Label
             {
                 Text = "→\n\n←",
-                ForeColor = Color.FromArgb(0, 80, 20),
-                Font = new Font("Courier New", 14, FontStyle.Bold),
+                ForeColor = Color.FromArgb(0, 90, 25),
+                Font = new Font("Courier New", 18, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 BackColor = Color.Transparent,
                 Dock = DockStyle.Fill
             };
             pnl.Controls.Add(lbl);
-
-            bool vis = true;
+            bool v = true;
             var t = new System.Windows.Forms.Timer { Interval = 900 };
             t.Tick += (s, e) =>
             {
-                lbl.ForeColor = vis ? Color.FromArgb(0, 80, 20) : Color.FromArgb(0, 30, 8);
-                vis = !vis;
+                lbl.ForeColor = v ? Color.FromArgb(0, 90, 25) : Color.FromArgb(0, 28, 8);
+                v = !v;
             };
             t.Start();
         }
 
-        // ════════ HELPERS ══════════════════════════════════════
-        private Panel MakePhone()
+        // ══════════════════ SHARED BUILDERS ══════════════════════════════
+        private static Label DeviceLabel(string text) => new()
         {
-            var p = new Panel { Size = new Size(252, 562), BackColor = PHONE_BG };
+            Text = text,
+            ForeColor = GREEN,
+            Font = new Font("Courier New", 9, FontStyle.Bold),
+            AutoSize = true,
+            BackColor = Color.Transparent,
+            Location = new Point(0, 4)
+        };
+
+        private static Panel PhoneFrame(int w, int h)
+        {
+            var p = new Panel { Size = new Size(w, h), BackColor = PHONE_BG };
             p.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                using var pen = new Pen(Color.FromArgb(40, 40, 40), 2);
+                using var pen = new Pen(Color.FromArgb(50, 50, 50), 2);
                 e.Graphics.DrawRectangle(pen, new Rectangle(1, 1, p.Width - 2, p.Height - 2));
                 using var nb = new SolidBrush(Color.Black);
-                e.Graphics.FillRectangle(nb, p.Width / 2 - 32, 0, 64, 16);
+                e.Graphics.FillRectangle(nb, p.Width / 2 - 36, 0, 72, 12);
             };
             return p;
         }
 
-        private Panel MakeAvatar(string emoji, Color bg)
+        private static Panel CircleAvatar(string initials, Color bg)
         {
-            var p = new Panel { Size = new Size(36, 36), Location = new Point(10, 11), BackColor = bg };
-            var gp = new System.Drawing.Drawing2D.GraphicsPath();
-            gp.AddEllipse(0, 0, 36, 36);
+            var p = new Panel { Size = new Size(42, 42), Location = new Point(12, 13), BackColor = bg };
+            var gp = new GraphicsPath(); gp.AddEllipse(0, 0, 42, 42);
             p.Region = new Region(gp);
             p.Controls.Add(new Label
             {
-                Text = emoji,
-                Font = new Font("Segoe UI Emoji", 14),
+                Text = initials,
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 BackColor = Color.Transparent,
                 ForeColor = Color.White,
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -467,193 +395,301 @@ parent.Controls.Add(wrap, 2, 0);
             });
             return p;
         }
-        // ════════ CHAT BUBBLE ══════════════════════════════════
-        private void AddBubble(Panel chat, string text, string sentiment, bool isSent)
+
+        private static Panel MakeChatArea() => new()
         {
-            if (chat.InvokeRequired) { chat.Invoke(() => AddBubble(chat, text, sentiment, isSent)); return; }
-            Color sentColor = sentiment switch
+            BackColor = CHAT_BG,
+            Dock = DockStyle.Fill,
+            AutoScroll = true,
+            Padding = new Padding(6, 8, 6, 8)
+        };
+
+        private static Panel MakeInputBar(Panel phone)
+        {
+            var bar = new Panel
             {
-                "Positive" => GREEN,
-                "Negative" => Color.FromArgb(255, 68, 68),
-                _ => Color.FromArgb(170, 170, 170)
+                Height = 62,
+                Dock = DockStyle.Bottom,
+                BackColor = HEADER_BG,
+                Padding = new Padding(10)
             };
-
-            string emoji = sentiment switch
-            {
-                "Positive" => "😊",
-                "Negative" => "😡",
-                _ => "😌"
-            };
-
-            var wrapper = new Panel
-            {
-                Width = chat.ClientSize.Width - 12,
-                AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                BackColor = Color.Transparent,
-                Margin = new Padding(0, 2, 0, 2)
-            };
-
-            var bubble = new Panel
-            {
-                BackColor = isSent ? BUBBLE_USER : BUBBLE_BOT,
-                Padding = new Padding(8, 6, 8, 20),
-                MaximumSize = new Size(200, 0),
-                AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink
-            };
-
-            bubble.Controls.Add(new Label
-            {
-                Text = $"{sentiment.ToUpper()}",
-                ForeColor = sentColor,
-                Font = new Font("Courier New", 7, FontStyle.Bold),
-                BackColor = Color.Transparent,
-                AutoSize = true,
-                Location = new Point(4, 4)
-            });
-
-            bubble.Controls.Add(new Label
-            {
-                Text = $"{emoji} {text}",
-                ForeColor = TEXT_CLR,
-                Font = new Font("Segoe UI", 10),
-                BackColor = Color.Transparent,
-                AutoSize = true,
-                MaximumSize = new Size(180, 0),
-                Location = new Point(4, 18)
-            });
-
-            bubble.Controls.Add(new Label
-            {
-                Text = DateTime.Now.ToString("HH:mm"),
-                ForeColor = Color.FromArgb(134, 150, 160),
-                Font = new Font("Courier New", 7),
-                BackColor = Color.Transparent,
-                AutoSize = true,
-                Location = new Point(4, bubble.Height - 16)
-            });
-
-            wrapper.Controls.Add(bubble);
-
-            wrapper.SizeChanged += (s, e) =>
-            {
-                bubble.Left = isSent ? wrapper.Width - bubble.Width - 4 : 4;
-                // fix time label position
-                foreach (Control c in bubble.Controls)
-                    if (c is Label l && l.Font.Size == 7 && l.Text.Contains(":"))
-                        l.Location = new Point(bubble.Width - l.Width - 8, bubble.Height - l.Height - 2);
-            };
-
-            chat.Controls.Add(wrapper);
-            chat.AutoScrollPosition = new Point(0, chat.DisplayRectangle.Height);
+            phone.Controls.Add(bar);
+            return bar;
         }
 
-        // ════════ TYPING INDICATOR ═════════════════════════════
-        private Panel AddTyping(Panel chat)
+        // ══════════════════ CHAT BUBBLE ═══════════════════════════════════
+        // Renders a proper WhatsApp-style bubble.
+        // msgText  = the actual message to display
+        // sentiment = "Positive" / "Negative" / "Neutral"
+        // isSent   = true → right-aligned green (user sent)
+        //            false → left-aligned dark (received)
+        private void AddBubble(Panel chat, string msgText,
+                               string sentiment, bool isSent)
         {
             if (chat.InvokeRequired)
             {
-                Panel r = null!;
-                chat.Invoke(() => r = AddTyping(chat));
-                return r;
+                chat.Invoke(() => AddBubble(chat, msgText, sentiment, isSent));
+                return;
             }
-            var wrapper = new Panel
+
+            Color sentColor = sentiment switch
             {
-                Width = chat.ClientSize.Width - 12,
-                Height = 34,
+                "Positive" => Color.FromArgb(0, 210, 60),
+                "Negative" => Color.FromArgb(255, 70, 70),
+                _ => Color.FromArgb(160, 160, 160)
+            };
+            string sentLabel = sentiment switch
+            {
+                "Positive" => "● POSITIVE",
+                "Negative" => "● NEGATIVE",
+                _ => "● NEUTRAL"
+            };
+
+            Color bgColor = isSent ? BUBBLE_USER : BUBBLE_BOT;
+            int maxInner = 248;
+            int padX = 12;
+            int padY = 8;
+
+            // Measure everything so the bubble fits the text exactly
+            using var g = chat.CreateGraphics();
+            var msgFont = new Font("Segoe UI", 12);
+            var tagFont = new Font("Courier New", 8, FontStyle.Bold);
+            var timeFont = new Font("Courier New", 8);
+
+            var msgSz = g.MeasureString(msgText, msgFont, maxInner);
+            var tagSz = g.MeasureString(sentLabel, tagFont);
+            var timeSz = g.MeasureString("00:00 ✓✓", timeFont);
+
+            int bw = (int)Math.Min(
+                Math.Max(msgSz.Width, Math.Max(tagSz.Width, timeSz.Width)) + padX * 2 + 6,
+                maxInner + padX * 2);
+
+            int bh = padY
+                   + (int)tagSz.Height + 4
+                   + (int)msgSz.Height + 6
+                   + (int)timeSz.Height + padY;
+
+            // ── Row (full width of chat panel) ────────────────────────────
+            var row = new Panel
+            {
+                Width = chat.ClientSize.Width - 14,
+                Height = bh + 10,
                 BackColor = Color.Transparent
             };
 
+            // ── Bubble ────────────────────────────────────────────────────
             var bubble = new Panel
             {
-                Size = new Size(58, 28),
-                BackColor = BUBBLE_BOT,
-                Location = new Point(4, 3)
+                Size = new Size(bw, bh),
+                Top = 5,
+                BackColor = Color.Transparent  // painted below
+            };
+
+            bubble.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using var br = new SolidBrush(bgColor);
+                using var rr = RoundedRect(new Rectangle(0, 0, bw - 1, bh - 1), 10);
+                e.Graphics.FillPath(br, rr);
+            };
+
+            // Sentiment tag
+            bubble.Controls.Add(new Label
+            {
+                Text = sentLabel,
+                ForeColor = sentColor,
+                Font = tagFont,
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(padX, padY)
+            });
+
+            // Message text — this is what the user typed / bot replied
+            bubble.Controls.Add(new Label
+            {
+                Text = msgText,
+                ForeColor = TEXT_CLR,
+                Font = msgFont,
+                BackColor = Color.Transparent,
+                AutoSize = false,
+                Size = new Size(bw - padX * 2, (int)msgSz.Height + 4),
+                Location = new Point(padX, padY + (int)tagSz.Height + 4)
+            });
+
+            // Timestamp + ticks
+            string timeStr = isSent
+                ? $"{DateTime.Now:HH:mm}  ✓✓"
+                : $"{DateTime.Now:HH:mm}";
+
+            var timeLbl = new Label
+            {
+                Text = timeStr,
+                ForeColor = Color.FromArgb(110, 130, 140),
+                Font = timeFont,
+                BackColor = Color.Transparent,
+                AutoSize = true
+            };
+            // Position after bubble sizes itself
+            bubble.Controls.Add(timeLbl);
+            bubble.Layout += (s, e) =>
+            {
+                timeLbl.Location = new Point(
+                    bw - (int)timeSz.Width - padX,
+                    bh - (int)timeSz.Height - padY + 2);
+            };
+
+            // ── Align bubble: right = sent, left = received ───────────────
+            bubble.Left = isSent ? row.Width - bw - 4 : 4;
+            row.Resize += (s, e) =>
+            {
+                bubble.Left = isSent ? row.Width - bw - 4 : 4;
+            };
+
+            row.Controls.Add(bubble);
+            chat.Controls.Add(row);
+            ScrollDown(chat);
+        }
+
+        // ══════════════════ TYPING INDICATOR ══════════════════════════════
+        private Panel AddTyping(Panel chat)
+        {
+            if (chat.InvokeRequired)
+            { Panel r = null!; chat.Invoke(() => r = AddTyping(chat)); return r; }
+
+            var row = new Panel
+            {
+                Width = chat.ClientSize.Width - 14,
+                Height = 44,
+                BackColor = Color.Transparent
+            };
+            var bubble = new Panel
+            {
+                Size = new Size(72, 34),
+                Location = new Point(4, 5),
+                BackColor = Color.Transparent
+            };
+            bubble.Paint += (s, e) =>
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                using var br = new SolidBrush(BUBBLE_BOT);
+                using var rr = RoundedRect(new Rectangle(0, 0, 71, 33), 10);
+                e.Graphics.FillPath(br, rr);
             };
 
             var dots = new Label
             {
                 Text = "● ● ●",
-                ForeColor = Color.FromArgb(134, 150, 160),
-                Font = new Font("Segoe UI", 9),
+                ForeColor = Color.FromArgb(110, 130, 140),
+                Font = new Font("Segoe UI", 11),
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                Location = new Point(5, 5)
+                Location = new Point(8, 5)
             };
             bubble.Controls.Add(dots);
-            wrapper.Controls.Add(bubble);
-            chat.Controls.Add(wrapper);
-            chat.AutoScrollPosition = new Point(0, chat.DisplayRectangle.Height);
+            row.Controls.Add(bubble);
+            chat.Controls.Add(row);
+            ScrollDown(chat);
 
-            int frame = 0;
             string[] frames = { "●", "● ●", "● ● ●" };
+            int f = 0;
             var t = new System.Windows.Forms.Timer { Interval = 450 };
-            t.Tick += (s, e) => { dots.Text = frames[frame++ % 3]; };
+            t.Tick += (s, e) => { if (!dots.IsDisposed) dots.Text = frames[f++ % 3]; };
             t.Start();
-            wrapper.Tag = t;
-
-            return wrapper;
+            row.Tag = t;
+            return row;
         }
 
-        private void RemoveTyping(Panel chat, Panel? wrapper)
+        private void RemoveTyping(Panel chat, Panel? row)
         {
-            if (wrapper == null) return;
-            if (chat.InvokeRequired) { chat.Invoke(() => RemoveTyping(chat, wrapper)); return; }
-            if (wrapper.Tag is System.Windows.Forms.Timer t) t.Stop();
-            chat.Controls.Remove(wrapper);
+            if (row == null) return;
+            if (chat.InvokeRequired) { chat.Invoke(() => RemoveTyping(chat, row)); return; }
+            if (row.Tag is System.Windows.Forms.Timer t) t.Stop();
+            chat.Controls.Remove(row);
         }
 
+        private static void ScrollDown(Panel p) =>
+            p.AutoScrollPosition = new Point(0, p.DisplayRectangle.Height);
 
-        // ════════ SEND MESSAGE ══════════════════════════════════
+        // ══════════════════ SEND MESSAGE ══════════════════════════════════
+        // Flow:
+        //   1. User types message → show in USER phone (right bubble) + BOT phone (left bubble)
+        //   2. ML.NET analyzes sentiment of user message
+        //   3. Claude API generates bot reply
+        //   4. Show bot reply in USER phone (left bubble, received) + BOT phone (right bubble, sent)
         private async Task SendMessage()
         {
-            string text = txtInput.Text.Trim();
-            if (string.IsNullOrEmpty(text) || !btnSend.Enabled) return;
-            txtInput.Text = "";
+            string userText = txtInput.Text.Trim();
+            if (string.IsNullOrEmpty(userText) || !btnSend.Enabled) return;
+            if (_sentimentService == null || _botService == null)
+            {
+                MessageBox.Show("Services not initialized. Check startup errors.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            txtInput.Clear();
             btnSend.Enabled = false;
             lblUserStatus.Text = "● PROCESSING...";
             lblUserStatus.ForeColor = Color.Orange;
+            SetStatus("PROCESSING...");
 
-            AddBubble(pnlUserChat, text, "Analyzing", true);
-            SetStatus("PROCESSING MESSAGE...");
-            Log("IN", $"USER → \"{Trunc(text, 32)}\"", "in");
+            Log("IN", $"USER → \"{Trunc(userText, 42)}\"", "in");
             Log("ML", "Running SdcaMaximumEntropy...", "ml");
 
+            // Show typing on bot side while analyzing
             var botTyping = AddTyping(pnlBotChat);
 
             try
             {
-                // 1. Analyze user message
-                var (uSent, uEmoji, uConf) = _sentimentService.Analyze(text);
+                // ── Step 1: Analyze user message ──────────────────────────
+                var (uSent, uEmoji, uConf) = _sentimentService.Analyze(userText);
                 RemoveTyping(pnlBotChat, botTyping);
 
-                // Update user side
-                AddBubble(pnlUserChat, text, uSent, true);
-                AddBubble(pnlBotChat, text, uSent, false);
+                // USER phone: right bubble (user sent this)
+                // BOT phone:  left bubble  (bot received this)
+                AddBubble(pnlUserChat, userText, uSent, isSent: true);
+                AddBubble(pnlBotChat, userText, uSent, isSent: false);
                 UpdateStats(uSent);
-                Log("ML", $"USER ■ {uSent} {uEmoji} ({uConf * 100:F1}%)", uSent == "Positive" ? "pos" : uSent == "Negative" ? "neg" : "neu");
-                Log("BOT", "Forwarding to Claude API...", "bot");
 
-                // 2. Bot reply
-                await Task.Delay(500);
-                var userTyping = AddTyping(pnlUserChat);
-                string reply = await _botService.GetBotReplyAsync(text);
+                Log("ML", $"USER ■ {uSent} {uEmoji}  ({uConf * 100:F1}%)",
+                    uSent == "Positive" ? "pos" : uSent == "Negative" ? "neg" : "neu");
+                Log("BOT", "Calling Claude API...", "bot");
+
+                // ── Step 2: Get Claude reply ───────────────────────────────
                 await Task.Delay(400);
+                var userTyping = AddTyping(pnlUserChat);  // typing shown on user side
+
+                string botReply;
+                try
+                {
+                    botReply = await _botService.GetBotReplyAsync(userText);
+                }
+                catch (Exception apiEx)
+                {
+                    RemoveTyping(pnlUserChat, userTyping);
+                    // Show the clean error message — not raw JSON
+                    botReply = $"⚠ {apiEx.Message}";
+                    Log("ERR", Trunc(apiEx.Message, 55), "neg");
+                }
+
+                await Task.Delay(350);
                 RemoveTyping(pnlUserChat, userTyping);
 
-                // 3. Analyze bot reply
-                var (bSent, bEmoji, bConf) = _sentimentService.Analyze(reply);
+                // ── Step 3: Analyze bot reply ─────────────────────────────
+                var (bSent, bEmoji, bConf) = _sentimentService.Analyze(botReply);
 
-                AddBubble(pnlUserChat, reply, bSent, false);
-                AddBubble(pnlBotChat, reply, bSent, true);
+                // USER phone: left bubble  (bot's reply received by user)
+                // BOT phone:  right bubble (bot sent this)
+                AddBubble(pnlUserChat, botReply, bSent, isSent: false);
+                AddBubble(pnlBotChat, botReply, bSent, isSent: true);
                 UpdateStats(bSent);
 
-                Log("OUT", $"BOT → \"{Trunc(reply, 32)}\"", "out");
-                Log("ML", $"BOT ■ {bSent} {bEmoji} ({bConf * 100:F1}%)", bSent == "Positive" ? "pos" : bSent == "Negative" ? "neg" : "neu");
-                Log("──", "────────────────────────────────", "text");
+                Log("OUT", $"BOT → \"{Trunc(botReply, 42)}\"", "out");
+                Log("ML", $"BOT  ■ {bSent} {bEmoji}  ({bConf * 100:F1}%)",
+                    bSent == "Positive" ? "pos" : bSent == "Negative" ? "neg" : "neu");
+                Log("──", new string('─', 46), "text");
 
-                SetStatus($"IDLE — TOTAL:{_total} POS:{_pos} NEG:{_neg} NEU:{_neu}");
+                SetStatus($"IDLE — T:{_total}  POS:{_pos}  NEG:{_neg}  NEU:{_neu}");
                 lblUserStatus.Text = "● ONLINE";
                 lblUserStatus.ForeColor = GREEN;
             }
@@ -661,49 +697,50 @@ parent.Controls.Add(wrap, 2, 0);
             {
                 RemoveTyping(pnlBotChat, botTyping);
                 Log("ERR", ex.Message, "neg");
-                SetStatus("ERROR — CHECK LOGS");
+                SetStatus("ERROR — SEE LOG");
                 lblUserStatus.Text = "● ERROR";
                 lblUserStatus.ForeColor = Color.Red;
             }
-
-            btnSend.Enabled = true;
-            txtInput.Focus();
+            finally
+            {
+                btnSend.Enabled = true;
+                txtInput.Focus();
+            }
         }
 
-        // ════════ SERVER LOG ════════════════════════════════════
+        // ══════════════════ LOG ═══════════════════════════════════════════
         private void Log(string tag, string msg, string type)
         {
             if (flpLog.InvokeRequired) { flpLog.Invoke(() => Log(tag, msg, type)); return; }
 
             Color c = type switch
             {
-                "in" => Color.FromArgb(0, 170, 255),
-                "out" => Color.FromArgb(255, 170, 0),
+                "in" => Color.FromArgb(0, 185, 255),
+                "out" => Color.FromArgb(255, 185, 0),
                 "ml" => GREEN,
-                "bot" => Color.FromArgb(255, 68, 255),
-                "pos" => GREEN,
-                "neg" => Color.FromArgb(255, 68, 68),
-                "neu" => Color.FromArgb(136, 136, 136),
-                _ => Color.FromArgb(0, 180, 40)
+                "bot" => Color.FromArgb(200, 80, 255),
+                "pos" => Color.FromArgb(0, 220, 60),
+                "neg" => Color.FromArgb(255, 80, 80),
+                "neu" => Color.FromArgb(150, 150, 150),
+                _ => Color.FromArgb(0, 170, 40)
             };
 
-            var line = new Label
+            flpLog.Controls.Add(new Label
             {
-                Text = $"[{DateTime.Now:HH:mm:ss}] [{tag}] {msg}",
+                Text = $"[{DateTime.Now:HH:mm:ss}] [{tag,-5}] {msg}",
                 ForeColor = c,
-                Font = new Font("Courier New", 7),
+                Font = new Font("Courier New", 8),
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                MaximumSize = new Size(270, 0),
+                MaximumSize = new Size(355, 0),
                 Margin = new Padding(0, 1, 0, 1)
-            };
+            });
 
-            flpLog.Controls.Add(line);
-            while (flpLog.Controls.Count > 80)
+            while (flpLog.Controls.Count > 120)
                 flpLog.Controls.RemoveAt(0);
 
             var scroll = flpLog.Parent as Panel;
-            if (scroll != null)
+            if (scroll != null && !scroll.IsDisposed)
                 scroll.AutoScrollPosition = new Point(0, scroll.DisplayRectangle.Height);
         }
 
@@ -721,115 +758,116 @@ parent.Controls.Add(wrap, 2, 0);
             else if (sentiment == "Negative") _neg++;
             else _neu++;
 
-            void Update()
+            void Apply()
             {
                 lblTotal.Text = _total.ToString();
                 lblPos.Text = _pos.ToString();
                 lblNeg.Text = _neg.ToString();
                 lblNeu.Text = _neu.ToString();
             }
+            if (lblTotal.InvokeRequired) lblTotal.Invoke(Apply); else Apply();
+        }
 
-            if (lblTotal.InvokeRequired) lblTotal.Invoke(Update);
-            else Update();
+        private static Label StatLabel(string val, string name,
+            Color color, ref int x, Panel parent)
+        {
+            var vl = new Label
+            {
+                Text = val,
+                ForeColor = color,
+                Font = new Font("Courier New", 16, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(x, 6)
+            };
+            var nl = new Label
+            {
+                Text = name,
+                ForeColor = Color.FromArgb(0, 90, 20),
+                Font = new Font("Courier New", 7),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(x, 32)
+            };
+            parent.Controls.Add(vl);
+            parent.Controls.Add(nl);
+            x += 90;
+            return vl;
         }
 
         private void BootLog()
         {
             Task.Run(async () =>
             {
-                await Task.Delay(600);
-                Log("BOOT", "ML.NET SdcaMaximumEntropy trainer init...", "text");
-                await Task.Delay(800);
-                Log("BOOT", "Loading training dataset...", "text");
-                await Task.Delay(900);
-                Log("BOOT", "Claude API connected", "text");
-                await Task.Delay(400);
-                Log("READY", "■ SERVER ONLINE — AWAITING MESSAGES", "pos");
+                await Task.Delay(400); Log("BOOT", "ML.NET SDCA trainer loading...", "text");
+                await Task.Delay(700); Log("BOOT", "Training sentiment model...", "text");
+                await Task.Delay(900); Log("BOOT", "Reading .env configuration...", "bot");
+                await Task.Delay(500); Log("BOOT", "Claude API client ready.", "bot");
+                await Task.Delay(200); Log("READY", "■ SERVER ONLINE — AWAITING INPUT", "pos");
             });
         }
 
-        private string Trunc(string s, int max) =>
-            s.Length > max ? s[..max] + "..." : s;
+        private static string Trunc(string s, int max) =>
+            s.Length > max ? s[..max] + "…" : s;
 
-
-
-
-
-
-        private Label MakeStat(string val, string name, Color color, ref int x, Panel parent)
-    {
-        var valLbl = new Label
+        // ══════════════════ ROUNDED RECT ══════════════════════════════════
+        private static GraphicsPath RoundedRect(Rectangle r, int radius)
         {
-            Text      = val,
-            ForeColor = color,
-            Font      = new Font("Courier New", 13, FontStyle.Bold),
-            BackColor = Color.Transparent,
-            AutoSize  = true,
-            Location  = new Point(x, 4)
-        };
-        var namLbl = new Label
-        {
-            Text      = name,
-            ForeColor = DIM_GREEN,
-            Font      = new Font("Courier New", 6),
-            BackColor = Color.Transparent,
-            AutoSize  = true,
-            Location  = new Point(x, 24)
-        };
-        parent.Controls.Add(valLbl);
-        parent.Controls.Add(namLbl);
-        x += 64;
-        return valLbl;
-    }
-
-
-        protected override void OnFormClosed(FormClosedEventArgs e)
-        {
-            _matrixTimer?.Stop();
-            _matrixGfx?.Dispose();
-            _matrixBitmap?.Dispose();
-            _botService?.Dispose();
-            base.OnFormClosed(e);
+            var gp = new GraphicsPath();
+            gp.AddArc(r.X, r.Y, radius * 2, radius * 2, 180, 90);
+            gp.AddArc(r.Right - radius * 2, r.Y, radius * 2, radius * 2, 270, 90);
+            gp.AddArc(r.Right - radius * 2, r.Bottom - radius * 2, radius * 2, radius * 2, 0, 90);
+            gp.AddArc(r.X, r.Bottom - radius * 2, radius * 2, radius * 2, 90, 90);
+            gp.CloseFigure();
+            return gp;
         }
 
+        // ══════════════════ MATRIX RAIN ═══════════════════════════════════
         private void StartMatrixRain()
         {
-            _matrixBitmap = new Bitmap(this.Width, this.Height);
-            _matrixGfx = Graphics.FromImage(_matrixBitmap);
-            int cols = this.Width / 14;
+            _matrixBmp = new Bitmap(Width, Height);
+            _matrixGfx = Graphics.FromImage(_matrixBmp);
+            int cols = Width / 14;
             _drops = new float[cols];
             for (int i = 0; i < cols; i++)
-                _drops[i] = _rnd.Next(this.Height / 14);
+                _drops[i] = _rnd.Next(Height / 14);
 
             pbxMatrix = new PictureBox { Dock = DockStyle.Fill, BackColor = Color.Transparent };
-            pbxMatrix.Image = _matrixBitmap;
-            this.Controls.Add(pbxMatrix);
+            pbxMatrix.Image = _matrixBmp;
+            Controls.Add(pbxMatrix);
             pbxMatrix.SendToBack();
 
-            _matrixTimer = new System.Windows.Forms.Timer { Interval = 60 };
+            _matrixTimer = new System.Windows.Forms.Timer { Interval = 55 };
             _matrixTimer.Tick += (s, e) => DrawMatrix();
             _matrixTimer.Start();
         }
 
         private void DrawMatrix()
         {
-            using var fadeBrush = new SolidBrush(Color.FromArgb(15, 10, 10, 10));
-            _matrixGfx.FillRectangle(fadeBrush, 0, 0, _matrixBitmap.Width, _matrixBitmap.Height);
-
+            using var fade = new SolidBrush(Color.FromArgb(18, 8, 8, 8));
+            _matrixGfx.FillRectangle(fade, 0, 0, _matrixBmp.Width, _matrixBmp.Height);
             using var font = new Font("Courier New", 11);
-            using var brush = new SolidBrush(Color.FromArgb(20, 0, 255, 65));
-
+            using var brush = new SolidBrush(Color.FromArgb(16, 0, 255, 65));
             for (int i = 0; i < _drops.Length; i++)
             {
-                char c = MATRIX_CHARS[_rnd.Next(MATRIX_CHARS.Length)];
-                _matrixGfx.DrawString(c.ToString(), font, brush, i * 14, _drops[i] * 14);
-
-                if (_drops[i] * 14 > _matrixBitmap.Height && _rnd.NextDouble() > 0.975)
+                _matrixGfx.DrawString(
+                    MATRIX_CHARS[_rnd.Next(MATRIX_CHARS.Length)].ToString(),
+                    font, brush, i * 14, _drops[i] * 14);
+                if (_drops[i] * 14 > _matrixBmp.Height && _rnd.NextDouble() > 0.975)
                     _drops[i] = 0;
                 _drops[i] += 0.5f;
             }
             pbxMatrix.Refresh();
         }
+
+        // ══════════════════ CLEANUP ═══════════════════════════════════════
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            _matrixTimer?.Stop();
+            _matrixGfx?.Dispose();
+            _matrixBmp?.Dispose();
+            _botService?.Dispose();
+            base.OnFormClosed(e);
+        }
     }
 }
-

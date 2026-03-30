@@ -1,16 +1,10 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SentimentChat.Services
+namespace SentimentChat.Web.Services
 {
-    // ── Typed request models with correct JSON names ───────────────────────
-    // ROOT CAUSE FIX: anonymous types like  new { model = "...", max_tokens = 300 }
-    // serialize as PascalCase { "Model": "...", "MaxTokens": 300 } by default in
-    // System.Text.Json — Claude API rejects this with 400 Bad Request.
-    // [JsonPropertyName] guarantees the exact field names the API expects.
-
     internal class ClaudeRequest
     {
         [JsonPropertyName("model")]
@@ -65,15 +59,13 @@ namespace SentimentChat.Services
                  .Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        // Manually reads .env file — WinForms does not auto-load it
         private static void LoadDotEnv()
         {
             string[] paths =
             {
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\.env"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.env"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\.env")
+                Path.Combine(Directory.GetCurrentDirectory(), ".env"),
+                Path.Combine(Directory.GetCurrentDirectory(), @"..\.env"),
+                Path.Combine(Directory.GetCurrentDirectory(), @"..\..\.env"),
             };
 
             foreach (string p in paths)
@@ -97,7 +89,6 @@ namespace SentimentChat.Services
 
         public async Task<string> GetBotReplyAsync(string userMessage)
         {
-            // Strongly-typed payload — correct JSON field names guaranteed
             var request = new ClaudeRequest
             {
                 Model = "claude-3-haiku-20240307",
@@ -130,7 +121,6 @@ namespace SentimentChat.Services
 
             if (!resp.IsSuccessStatusCode)
             {
-                // Extract human-readable message from Claude error body
                 string detail = TryGetErrorMessage(json);
                 throw new Exception(resp.StatusCode switch
                 {
