@@ -1,0 +1,886 @@
+@page
+@model ThreeScreenModel
+@{
+    ViewData["Title"] = "Three Screen System";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three Screen Sentiment Analysis System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --mobile-bg: #0f1419;
+            --server-bg: #1a1a2e;
+            --bot-bg: #2a0845;
+            --accent: #6f42c1;
+            --positive: #25d366;
+            --negative: #dc3545;
+            --neutral: #6c757d;
+            --text-primary: #e9edef;
+            --text-secondary: #8696a0;
+            --border-color: #2a3942;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #2a0845 100%);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .main-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .header h1 {
+            color: var(--accent);
+            font-size: 2rem;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            margin: 0.5rem 0 0 0;
+        }
+
+        .screens-container {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .device {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .device-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .device-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+        }
+
+        .device-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--positive);
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Mobile Device */
+        .mobile {
+            background: var(--mobile-bg);
+        }
+
+        .mobile-header {
+            background: var(--bg-secondary);
+            color: var(--positive);
+        }
+
+        .mobile-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: var(--mobile-bg);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: var(--positive);
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.bot .message-bubble {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .message-info {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sentiment-badge {
+            padding: 0.2rem 0.4rem;
+            border-radius: 1rem;
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+
+        .sentiment-positive { background: var(--positive); color: white; }
+        .sentiment-negative { background: var(--negative); color: white; }
+        .sentiment-neutral { background: var(--neutral); color: white; }
+
+        .mobile-input {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .form-control {
+            background: var(--mobile-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 2rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus {
+            background: var(--mobile-bg);
+            border-color: var(--positive);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(37, 211, 102, 0.25);
+        }
+
+        .btn-send {
+            background: var(--positive);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-send:hover {
+            background: #128c7e;
+            transform: scale(1.05);
+        }
+
+        /* Server Device */
+        .server {
+            background: var(--server-bg);
+        }
+
+        .server-header {
+            background: var(--accent);
+            color: white;
+        }
+
+        .server-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .processing-log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border-left: 3px solid var(--accent);
+            background: rgba(111, 66, 193, 0.1);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @@keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .log-entry.processing {
+            border-left-color: var(--accent);
+            background: rgba(111, 66, 193, 0.1);
+        }
+
+        .log-entry.positive {
+            border-left-color: var(--positive);
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        .log-entry.negative {
+            border-left-color: var(--negative);
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .log-entry.neutral {
+            border-left-color: var(--neutral);
+            background: rgba(108, 117, 125, 0.1);
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        .log-message {
+            color: var(--text-primary);
+            margin-top: 0.25rem;
+        }
+
+        .server-stats {
+            background: rgba(111, 66, 193, 0.1);
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(111, 66, 193, 0.05);
+            border-radius: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-name {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+        }
+
+        /* Bot Device */
+        .bot {
+            background: var(--bot-bg);
+        }
+
+        .bot-header {
+            background: var(--accent);
+            color: white;
+        }
+
+        .bot-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .bot-responses {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .response-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--accent);
+            background: rgba(111, 66, 193, 0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .response-item.positive {
+            border-left-color: var(--positive);
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        .response-item.negative {
+            border-left-color: var(--negative);
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .response-item.neutral {
+            border-left-color: var(--neutral);
+            background: rgba(108, 117, 125, 0.1);
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .response-sentiment {
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .response-time {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        .response-text {
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+            line-height: 1.3;
+            font-size: 0.9rem;
+        }
+
+        .bot-thinking {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(111, 66, 193, 0.2);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .bot-thinking.active {
+            display: flex;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @@keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .current-sentiment {
+            background: rgba(111, 66, 193, 0.1);
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sentiment-display {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sentiment-label {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .connection-arrows {
+            position: absolute;
+            top: 50%;
+            font-size: 1.5rem;
+            color: var(--accent);
+            z-index: 10;
+        }
+
+        .arrow-mobile-server {
+            left: -1rem;
+        }
+
+        .arrow-server-bot {
+            right: -1rem;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 2rem;
+        }
+
+        .welcome-message i {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-network-wired me-2"></i>Three Screen Sentiment Analysis System</h1>
+            <p>Real-time communication between Mobile, Server, and Bot devices</p>
+        </div>
+
+        <div class="screens-container">
+            <!-- Mobile Device -->
+            <div class="device mobile">
+                <div class="device-header mobile-header">
+                    <div class="device-title">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Mobile Device</span>
+                    </div>
+                    <div class="device-status">
+                        <div class="status-dot"></div>
+                        <span>Connected</span>
+                    </div>
+                </div>
+
+                <div class="mobile-messages" id="mobileMessages">
+                    <div class="welcome-message">
+                        <i class="fas fa-comments"></i>
+                        <p>Type a message below to start chatting!</p>
+                        <small>Your message will be analyzed on the server</small>
+                    </div>
+                </div>
+
+                <div class="mobile-input">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="mobileInput" 
+                               placeholder="Type your message..." maxlength="200">
+                        <button class="btn-send" id="mobileSend" type="button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Device -->
+            <div class="device server">
+                <div class="connection-arrows arrow-mobile-server">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="device-header server-header">
+                    <div class="device-title">
+                        <i class="fas fa-server"></i>
+                        <span>Server Device</span>
+                    </div>
+                    <div class="device-status">
+                        <div class="status-dot"></div>
+                        <span>Processing</span>
+                    </div>
+                </div>
+
+                <div class="server-content">
+                    <div class="processing-log" id="serverLog">
+                        <div class="log-entry">
+                            <div class="log-time">[@DateTime.Now.ToString("HH:mm:ss")]</div>
+                            <div class="log-message">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Server initialized successfully
+                            </div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">[@DateTime.Now.ToString("HH:mm:ss")]</div>
+                            <div class="log-message">
+                                <i class="fas fa-brain me-1"></i>
+                                Sentiment analysis model loaded
+                            </div>
+                        </div>
+                        <div class="log-entry">
+                            <div class="log-time">[@DateTime.Now.ToString("HH:mm:ss")]</div>
+                            <div class="log-message">
+                                <i class="fas fa-link me-1"></i>
+                                Waiting for messages from Mobile...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="server-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalProcessed">0</div>
+                            <div class="stat-name">Total</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="positiveCount">0</div>
+                            <div class="stat-name">Positive</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="negativeCount">0</div>
+                            <div class="stat-name">Negative</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="neutralCount">0</div>
+                            <div class="stat-name">Neutral</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bot Device -->
+            <div class="device bot">
+                <div class="connection-arrows arrow-server-bot">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <div class="device-header bot-header">
+                    <div class="device-title">
+                        <i class="fas fa-robot"></i>
+                        <span>Bot Device</span>
+                    </div>
+                    <div class="device-status">
+                        <div class="status-dot"></div>
+                        <span>AI Active</span>
+                    </div>
+                </div>
+
+                <div class="bot-content">
+                    <div class="bot-thinking" id="botThinking">
+                        <div class="thinking-dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <span>Bot is thinking...</span>
+                    </div>
+
+                    <div class="bot-responses" id="botResponses">
+                        <div class="welcome-message">
+                            <i class="fas fa-robot"></i>
+                            <p>AI Bot Ready</p>
+                            <small>Waiting for processed messages from Server...</small>
+                        </div>
+                    </div>
+
+                    <div class="current-sentiment">
+                        <div class="sentiment-display" id="currentSentimentEmoji">🤖</div>
+                        <div class="sentiment-label" id="currentSentimentLabel">Ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        // Connection to SignalR hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        let messageId = 0;
+
+        // Statistics
+        let stats = {
+            total: 0,
+            positive: 0,
+            negative: 0,
+            neutral: 0
+        };
+
+        // Update server statistics
+        function updateServerStats() {
+            document.getElementById('totalProcessed').textContent = stats.total;
+            document.getElementById('positiveCount').textContent = stats.positive;
+            document.getElementById('negativeCount').textContent = stats.negative;
+            document.getElementById('neutralCount').textContent = stats.neutral;
+        }
+
+        // Add message to mobile screen
+        function addMobileMessage(message) {
+            const mobileMessages = document.getElementById('mobileMessages');
+            
+            // Remove welcome message if it exists
+            const welcomeMsg = mobileMessages.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender.toLowerCase()}`;
+            
+            const sentimentClass = `sentiment-${message.sentiment.toLowerCase()}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <div>${message.text}</div>
+                    <div class="message-info">
+                        <span>${message.sender}</span>
+                        <span>${new Date(message.timestamp).toLocaleTimeString()}</span>
+                        <span class="sentiment-badge ${sentimentClass}">
+                            ${message.sentimentEmoji} ${message.sentiment}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            mobileMessages.appendChild(messageDiv);
+            mobileMessages.scrollTop = mobileMessages.scrollHeight;
+        }
+
+        // Add log entry to server screen
+        function addServerLog(message, type = 'info') {
+            const serverLog = document.getElementById('serverLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const time = new Date().toLocaleTimeString();
+            let icon = '';
+            let sentimentBadge = '';
+            
+            if (type === 'processing') {
+                icon = '<i class="fas fa-spinner fa-spin me-1"></i>';
+            } else if (type === 'positive') {
+                icon = '<i class="fas fa-smile me-1"></i>';
+                sentimentBadge = `<span class="sentiment-badge sentiment-positive">${message.sentimentEmoji} ${message.sentiment}</span>`;
+            } else if (type === 'negative') {
+                icon = '<i class="fas fa-frown me-1"></i>';
+                sentimentBadge = `<span class="sentiment-badge sentiment-negative">${message.sentimentEmoji} ${message.sentiment}</span>`;
+            } else if (type === 'neutral') {
+                icon = '<i class="fas fa-meh me-1"></i>';
+                sentimentBadge = `<span class="sentiment-badge sentiment-neutral">${message.sentimentEmoji} ${message.sentiment}</span>`;
+            } else {
+                icon = '<i class="fas fa-info-circle me-1"></i>';
+            }
+            
+            entry.innerHTML = `
+                <div class="log-time">[${time}]</div>
+                <div class="log-message">
+                    ${icon}
+                    ${message.text || message}
+                    ${sentimentBadge}
+                </div>
+            `;
+            
+            serverLog.appendChild(entry);
+            serverLog.scrollTop = serverLog.scrollHeight;
+        }
+
+        // Add response to bot screen
+        function addBotResponse(message) {
+            const botResponses = document.getElementById('botResponses');
+            
+            // Remove welcome message if it exists
+            const welcomeMsg = botResponses.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+            
+            const responseDiv = document.createElement('div');
+            responseDiv.className = `response-item ${message.sentiment.toLowerCase()}`;
+            
+            const sentimentClass = `sentiment-${message.sentiment.toLowerCase()}`;
+            
+            responseDiv.innerHTML = `
+                <div class="response-header">
+                    <span class="response-sentiment ${sentimentClass}">
+                        ${message.sentimentEmoji} ${message.sentiment}
+                    </span>
+                    <span class="response-time">${new Date(message.timestamp).toLocaleTimeString()}</span>
+                </div>
+                <div class="response-text">${message.text}</div>
+            `;
+            
+            botResponses.appendChild(responseDiv);
+            botResponses.scrollTop = botResponses.scrollHeight;
+            
+            // Update current sentiment display
+            document.getElementById('currentSentimentEmoji').textContent = message.sentimentEmoji;
+            document.getElementById('currentSentimentLabel').textContent = message.sentiment;
+        }
+
+        // Handle incoming messages
+        connection.on("ReceiveMessage", (message) => {
+            console.log('Received message:', message);
+            
+            if (message.sender === 'Mobile User') {
+                // Add to mobile screen
+                addMobileMessage(message);
+                
+                // Add processing log to server
+                addServerLog({
+                    text: `Received from Mobile: "${message.text}"`
+                }, 'processing');
+                
+                // Update server stats
+                stats.total++;
+                stats[message.sentiment.toLowerCase()]++;
+                updateServerStats();
+                
+                // Add final sentiment log to server
+                setTimeout(() => {
+                    addServerLog(message, message.sentiment.toLowerCase());
+                }, 500);
+                
+            } else if (message.sender === 'Bot') {
+                // Hide bot thinking indicator
+                document.getElementById('botThinking').classList.remove('active');
+                
+                // Add to mobile screen
+                addMobileMessage(message);
+                
+                // Add to bot screen
+                addBotResponse(message);
+                
+                // Add to server log
+                addServerLog({
+                    text: `Bot response: "${message.text}"`
+                }, 'info');
+            }
+        });
+
+        // Send message from mobile
+        async function sendMobileMessage() {
+            const input = document.getElementById('mobileInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            const message = {
+                id: (++messageId).toString(),
+                text: text,
+                sender: 'Mobile User',
+                timestamp: new Date().toISOString(),
+                sentiment: 'Processing...',
+                sentimentEmoji: '⏳',
+                confidence: 0
+            };
+            
+            // Add message immediately to mobile UI
+            addMobileMessage(message);
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/chat/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please check connection.');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('mobileSend').addEventListener('click', sendMobileMessage);
+        document.getElementById('mobileInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMobileMessage();
+            }
+        });
+
+        // Show bot thinking when mobile user sends message
+        document.getElementById('mobileInput').addEventListener('input', () => {
+            if (document.getElementById('mobileInput').value.trim()) {
+                // Optional: Show thinking indicator
+            }
+        });
+
+        // Start connection
+        connection.start()
+            .then(() => {
+                console.log('Connected to SignalR hub');
+                addServerLog('Connected to SignalR hub successfully');
+            })
+            .catch(err => {
+                console.error('SignalR connection error:', err);
+                addServerLog('SignalR connection error: ' + err.message, 'error');
+            });
+    </script>
+</body>
+</html>

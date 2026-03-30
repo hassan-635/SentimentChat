@@ -1,0 +1,295 @@
+@page
+@model NavigationModel
+@{
+    ViewData["Title"] = "Three Screen Navigation";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three Screen Navigation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --accent: #6f42c1;
+            --text-primary: #e9edef;
+            --text-secondary: #8696a0;
+            --border-color: #2a3942;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #2a0845 100%);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .main-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(111, 66, 193, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+
+        .screens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .screen-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .screen-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(111, 66, 193, 0.3);
+        }
+
+        .screen-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .screen-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .screen-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .screen-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .screen-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .screen-button:hover {
+            background: #8b5cf6;
+            transform: scale(1.05);
+            color: white;
+            text-decoration: none;
+        }
+
+        .connection-flow {
+            background: rgba(111, 66, 193, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .flow-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .flow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .flow-step-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-step-text {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid #25d366;
+            border-radius: 2rem;
+            color: #25d366;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #25d366;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <h1 class="main-title">
+            <i class="fas fa-network-wired me-3"></i>
+            Three Screen System
+        </h1>
+        <p class="subtitle">Real-time Sentiment Analysis with AI Responses</p>
+
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>All Systems Online</span>
+        </div>
+
+        <div class="connection-flow">
+            <h3 class="flow-title"><i class="fas fa-exchange-alt me-2"></i>Communication Flow</h3>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="flow-step-text">Mobile User sends message</div>
+                </div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step">
+                    <div class="flow-step-icon"><i class="fas fa-server"></i></div>
+                    <div class="flow-step-text">Server analyzes sentiment</div>
+                </div>
+                <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="flow-step">
+                    <div class="flow-step-icon"><i class="fas fa-robot"></i></div>
+                    <div class="flow-step-text">Bot responds with matching sentiment</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screens-grid">
+            <div class="screen-card">
+                <div class="screen-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="screen-title">Mobile Screen</h3>
+                <p class="screen-description">
+                    User interface for sending messages and viewing chat history with real-time sentiment analysis
+                </p>
+                <a href="/Mobile" class="screen-button" target="_blank">
+                    <i class="fas fa-external-link-alt me-2"></i>Open Mobile
+                </a>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <h3 class="screen-title">Server Screen</h3>
+                <p class="screen-description">
+                    Processing center that analyzes message sentiment and manages communication flow
+                </p>
+                <a href="/Server" class="screen-button" target="_blank">
+                    <i class="fas fa-external-link-alt me-2"></i>Open Server
+                </a>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="screen-title">Bot Screen</h3>
+                <p class="screen-description">
+                    AI response center that generates sentiment-appropriate replies and tracks response patterns
+                </p>
+                <a href="/Bot" class="screen-button" target="_blank">
+                    <i class="fas fa-external-link-alt me-2"></i>Open Bot
+                </a>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <p class="text-secondary">
+                <i class="fas fa-info-circle me-2"></i>
+                Open all three screens in separate tabs to see the real-time communication flow
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

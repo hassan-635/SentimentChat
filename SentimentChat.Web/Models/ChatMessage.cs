@@ -9,5 +9,6 @@ namespace SentimentChat.Web.Models
         public string Sentiment { get; set; } = string.Empty;
         public string SentimentEmoji { get; set; } = string.Empty;
         public float Confidence { get; set; }
+        public string OriginalMessage { get; set; } = string.Empty;
     }
 }

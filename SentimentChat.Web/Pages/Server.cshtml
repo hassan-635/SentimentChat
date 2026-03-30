@@ -1,0 +1,495 @@
+@page
+@model ServerModel
+@{
+    ViewData["Title"] = "Server Screen";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Screen - Processing Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --server-bg: #0a0a0a;
+            --server-panel: #1a1a1a;
+            --server-accent: #28a745;
+            --server-danger: #dc3545;
+            --server-warning: #ffc107;
+            --text-primary: #e9edef;
+            --text-secondary: #8696a0;
+            --border-color: #2a3942;
+            --positive: #25d366;
+            --negative: #dc3545;
+            --neutral: #6c757d;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .server-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--server-bg);
+        }
+
+        .server-header {
+            background: var(--server-panel);
+            padding: 1rem;
+            border-bottom: 2px solid var(--server-accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .server-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .server-title h5 {
+            margin: 0;
+            color: var(--server-accent);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--server-accent);
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { opacity: 1; box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        .server-content {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .processing-panel {
+            flex: 2;
+            background: var(--server-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-panel {
+            flex: 1;
+            background: var(--server-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .panel-header {
+            background: rgba(40, 167, 69, 0.1);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            color: var(--server-accent);
+        }
+
+        .processing-log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border-left: 3px solid var(--server-accent);
+            background: rgba(40, 167, 69, 0.05);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @@keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .log-entry.processing {
+            border-left-color: var(--server-warning);
+            background: rgba(255, 193, 7, 0.05);
+        }
+
+        .log-entry.positive {
+            border-left-color: var(--positive);
+            background: rgba(37, 211, 102, 0.05);
+        }
+
+        .log-entry.negative {
+            border-left-color: var(--negative);
+            background: rgba(220, 53, 69, 0.05);
+        }
+
+        .log-entry.neutral {
+            border-left-color: var(--neutral);
+            background: rgba(108, 117, 125, 0.05);
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .log-message {
+            color: var(--text-primary);
+            margin-top: 0.25rem;
+        }
+
+        .log-sentiment {
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card.positive {
+            background: rgba(37, 211, 102, 0.1);
+            border-color: var(--positive);
+        }
+
+        .stat-card.negative {
+            background: rgba(220, 53, 69, 0.1);
+            border-color: var(--negative);
+        }
+
+        .stat-card.neutral {
+            background: rgba(108, 117, 125, 0.1);
+            border-color: var(--neutral);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .processing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid var(--server-warning);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .processing-indicator.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--text-secondary);
+            border-top: 2px solid var(--server-warning);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .server-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(40, 167, 69, 0.05);
+            border-radius: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--server-accent);
+        }
+
+        .metric-name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--server-panel);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="server-container">
+        <div class="server-header">
+            <div class="server-title">
+                <i class="fas fa-server fa-2x"></i>
+                <div>
+                    <h5><i class="fas fa-microchip me-2"></i>SERVER SCREEN</h5>
+                    <small class="text-secondary">Sentiment Analysis Processing Center</small>
+                </div>
+            </div>
+            <div class="server-status">
+                <div class="status-light"></div>
+                <span>SYSTEM ONLINE</span>
+            </div>
+        </div>
+
+        <div class="server-content">
+            <div class="processing-panel">
+                <div class="panel-header">
+                    <i class="fas fa-cogs me-2"></i>MESSAGE PROCESSING LOG
+                </div>
+                
+                <div class="processing-indicator" id="processingIndicator">
+                    <div class="spinner"></div>
+                    <span>Processing message sentiment...</span>
+                </div>
+
+                <div class="processing-log" id="processingLog">
+                    <div class="log-entry">
+                        <div class="log-time">[@DateTime.Now.ToString("HH:mm:ss")]</div>
+                        <div class="log-message">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Server initialized successfully
+                        </div>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-time">[@DateTime.Now.ToString("HH:mm:ss")]</div>
+                        <div class="log-message">
+                            <i class="fas fa-brain text-info me-2"></i>
+                            Sentiment analysis model loaded
+                        </div>
+                    </div>
+                    <div class="log-entry">
+                        <div class="log-time">[@DateTime.Now.ToString("HH:mm:ss")]</div>
+                        <div class="log-message">
+                            <i class="fas fa-link text-warning me-2"></i>
+                            Waiting for messages from Mobile Screen...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="panel-header">
+                    <i class="fas fa-chart-bar me-2"></i>ANALYTICS
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalProcessed">0</div>
+                        <div class="stat-label">Total Processed</div>
+                    </div>
+                    
+                    <div class="stat-card positive">
+                        <div class="stat-number" id="positiveCount">0</div>
+                        <div class="stat-label">Positive</div>
+                    </div>
+                    
+                    <div class="stat-card negative">
+                        <div class="stat-number" id="negativeCount">0</div>
+                        <div class="stat-label">Negative</div>
+                    </div>
+                    
+                    <div class="stat-card neutral">
+                        <div class="stat-number" id="neutralCount">0</div>
+                        <div class="stat-label">Neutral</div>
+                    </div>
+                </div>
+
+                <div class="server-metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="avgConfidence">0%</div>
+                        <div class="metric-name">Avg Confidence</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="processTime">0ms</div>
+                        <div class="metric-name">Process Time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        // Connection to SignalR hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        // Statistics
+        let stats = {
+            total: 0,
+            positive: 0,
+            negative: 0,
+            neutral: 0,
+            totalConfidence: 0
+        };
+
+        // Update statistics display
+        function updateStats() {
+            document.getElementById('totalProcessed').textContent = stats.total;
+            document.getElementById('positiveCount').textContent = stats.positive;
+            document.getElementById('negativeCount').textContent = stats.negative;
+            document.getElementById('neutralCount').textContent = stats.neutral;
+            
+            const avgConf = stats.total > 0 ? Math.round((stats.totalConfidence / stats.total) * 100) : 0;
+            document.getElementById('avgConfidence').textContent = avgConf + '%';
+        }
+
+        // Add log entry
+        function addLogEntry(message, type = 'info') {
+            const log = document.getElementById('processingLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const time = new Date().toLocaleTimeString();
+            let icon = '';
+            let sentimentBadge = '';
+            
+            if (type === 'processing') {
+                icon = '<i class="fas fa-spinner fa-spin text-warning me-2"></i>';
+            } else if (type === 'positive') {
+                icon = '<i class="fas fa-smile text-success me-2"></i>';
+                sentimentBadge = `<span class="log-sentiment sentiment-positive">${message.sentimentEmoji} ${message.sentiment}</span>`;
+            } else if (type === 'negative') {
+                icon = '<i class="fas fa-frown text-danger me-2"></i>';
+                sentimentBadge = `<span class="log-sentiment sentiment-negative">${message.sentimentEmoji} ${message.sentiment}</span>`;
+            } else if (type === 'neutral') {
+                icon = '<i class="fas fa-meh text-secondary me-2"></i>';
+                sentimentBadge = `<span class="log-sentiment sentiment-neutral">${message.sentimentEmoji} ${message.sentiment}</span>`;
+            } else {
+                icon = '<i class="fas fa-info-circle text-info me-2"></i>';
+            }
+            
+            entry.innerHTML = `
+                <div class="log-time">[${time}]</div>
+                <div class="log-message">
+                    ${icon}
+                    ${message.text || message}
+                    ${sentimentBadge}
+                </div>
+            `;
+            
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Handle incoming messages
+        connection.on("ReceiveMessage", (message) => {
+            // Show processing indicator
+            const indicator = document.getElementById('processingIndicator');
+            indicator.classList.add('active');
+            
+            // Add processing log entry
+            addLogEntry({
+                text: `Received message from ${message.sender}: "${message.text}"`
+            }, 'processing');
+            
+            // Simulate processing time
+            setTimeout(() => {
+                indicator.classList.remove('active');
+                
+                // Update statistics
+                stats.total++;
+                stats[message.sentiment.toLowerCase()]++;
+                stats.totalConfidence += message.confidence;
+                updateStats();
+                
+                // Add final log entry with sentiment
+                addLogEntry(message, message.sentiment.toLowerCase());
+                
+                // Update process time
+                document.getElementById('processTime').textContent = Math.round(Math.random() * 100 + 50) + 'ms';
+            }, 1000);
+        });
+
+        // Start connection
+        connection.start()
+            .then(() => {
+                addLogEntry('Connected to SignalR hub successfully');
+                console.log('Server screen connected to SignalR hub');
+            })
+            .catch(err => {
+                addLogEntry('SignalR connection error: ' + err.message, 'error');
+                console.error('SignalR connection error:', err);
+            });
+    </script>
+</body>
+</html>
