@@ -6,7 +6,7 @@ namespace SentimentChat.Web.Services
     public class SentimentService
     {
         private readonly MLContext _mlContext;
-        private PredictionEngine<SentimentInput, SentimentPrediction> _predEngine;
+        private PredictionEngine<SentimentInput, SentimentPrediction> _predEngine = null!;
         
         public SentimentService()
         {

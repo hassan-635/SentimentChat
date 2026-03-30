@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SentimentChat.Web.Models;
 using SentimentChat.Web.Services;
+using SentimentChat.Web.Hubs;
 
 namespace SentimentChat.Web.Controllers
 {
