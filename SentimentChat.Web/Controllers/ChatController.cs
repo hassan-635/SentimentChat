@@ -38,7 +38,7 @@ namespace SentimentChat.Web.Controllers
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", message);
                 
                 // Generate sentiment-based AI response
-                var botReply = await GetSentimentBasedResponse(message.Text, sentiment);
+                var botReply = GetSentimentBasedResponse(message.Text, sentiment);
                 var (botSentiment, botEmoji, botConfidence) = _sentimentService.Analyze(botReply);
                 
                 var botMessage = new ChatMessage
@@ -64,7 +64,7 @@ namespace SentimentChat.Web.Controllers
             }
         }
 
-        private async Task<string> GetSentimentBasedResponse(string userMessage, string sentiment)
+        private string GetSentimentBasedResponse(string userMessage, string sentiment)
         {
             try
             {
@@ -77,20 +77,7 @@ namespace SentimentChat.Web.Controllers
                     _ => "You are a friendly AI assistant. Respond naturally and helpfully. Keep responses short."
                 };
 
-                // Create a custom bot request with sentiment-specific prompt
-                var request = new
-                {
-                    model = "claude-3-haiku-20240307",
-                    max_tokens = 300,
-                    system = systemPrompt,
-                    messages = new[]
-                    {
-                        new { role = "user", content = userMessage }
-                    }
-                };
-
-                // For now, return sentiment-based fallback responses
-                // You can integrate the actual Claude API call here
+                // Return sentiment-based responses
                 return sentiment switch
                 {
                     "Positive" => GetPositiveResponse(userMessage),
@@ -99,7 +86,7 @@ namespace SentimentChat.Web.Controllers
                     _ => "Thanks for your message! How can I help you today?"
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Fallback response if AI service fails
                 return $"I understand you're feeling {sentiment.ToLower()}. I'm here to help!";

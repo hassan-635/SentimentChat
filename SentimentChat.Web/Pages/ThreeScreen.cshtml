@@ -1,6 +1,7 @@
 @page
 @model ThreeScreenModel
 @{
+    Layout = null;
     ViewData["Title"] = "Three Screen System";
 }
 
@@ -8,7 +9,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Three Screen Sentiment Analysis System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -41,33 +42,25 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
-        .header {
-            background: var(--bg-secondary);
-            padding: 1rem;
-            text-align: center;
-            border-bottom: 2px solid var(--accent);
-        }
-
-        .header h1 {
-            color: var(--accent);
-            font-size: 2rem;
-            margin: 0;
-            font-weight: bold;
-        }
-
-        .header p {
-            color: var(--text-secondary);
-            margin: 0.5rem 0 0 0;
+        nav, footer, .navbar, .footer, .header {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
         }
 
         .screens-container {
             flex: 1;
             display: flex;
-            gap: 1rem;
-            padding: 1rem;
+            gap: 0.6rem;
+            padding: 0.5rem;
             overflow: hidden;
+            min-height: 0;
         }
 
         .device {
@@ -79,10 +72,12 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            max-height: 58vh;
+            min-height: 220px;
         }
 
         .device-header {
-            padding: 1rem;
+            padding: 0.5rem;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -130,8 +125,10 @@
         .mobile-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 0.4rem;
             background: var(--mobile-bg);
+            min-height: 60px;
+            max-height: 160px;
         }
 
         .message {
@@ -196,8 +193,11 @@
 
         .mobile-input {
             background: var(--bg-secondary);
-            padding: 1rem;
+            padding: 0.4rem;
             border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
+            min-height: 45px;
+            max-height: 55px;
         }
 
         .input-group {
@@ -210,8 +210,9 @@
             border: 1px solid var(--border-color);
             color: var(--text-primary);
             border-radius: 2rem;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem;
             font-size: 0.9rem;
+            height: auto;
         }
 
         .form-control:focus {
@@ -226,12 +227,13 @@
             border: none;
             color: white;
             border-radius: 50%;
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 2rem;
+            height: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
         .btn-send:hover {
@@ -259,9 +261,10 @@
         .processing-log {
             flex: 1;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 0.4rem;
             font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
+            font-size: 0.72rem;
+            max-height: 160px;
         }
 
         .log-entry {
@@ -310,29 +313,32 @@
 
         .server-stats {
             background: rgba(111, 66, 193, 0.1);
-            padding: 1rem;
+            padding: 0.4rem 0.5rem;
             border-top: 1px solid var(--border-color);
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 0.5rem;
+            gap: 0.3rem;
+            flex-shrink: 0;
+            max-height: 60px;
         }
 
         .stat-item {
             text-align: center;
-            padding: 0.5rem;
+            padding: 0.25rem;
             background: rgba(111, 66, 193, 0.05);
             border-radius: 0.25rem;
         }
 
         .stat-value {
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             font-weight: bold;
             color: var(--text-primary);
         }
 
         .stat-name {
-            font-size: 0.6rem;
+            font-size: 0.5rem;
             color: var(--text-secondary);
+            line-height: 1;
         }
 
         /* Bot Device */
@@ -355,7 +361,8 @@
         .bot-responses {
             flex: 1;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 0.4rem;
+            max-height: 160px;
         }
 
         .response-item {
@@ -444,9 +451,599 @@
             40% { transform: scale(1); }
         }
 
+        /* Responsive Design */
+        @@media (max-width: 1400px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @@media (max-width: 1200px) {
+            .screens-container {
+                flex-direction: column;
+                gap: 0.8rem;
+                padding: 0.6rem;
+            }
+            
+            .device {
+                max-height: 350px;
+                width: 100%;
+                flex: 1;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .connection-arrows {
+                display: none !important;
+            }
+        }
+
+        @@media (max-width: 1024px) {
+            .device {
+                max-height: 320px;
+            }
+            
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .mobile-messages {
+                min-height: 150px;
+            }
+            
+            .processing-log {
+                font-size: 0.75rem;
+            }
+            
+            .bot-responses {
+                font-size: 0.85rem;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .main-container {
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .header {
+                padding: 0.6rem 0.5rem;
+                flex-shrink: 0;
+            }
+            
+            .header h1 {
+                font-size: 1.2rem;
+                margin: 0;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+                margin: 0.2rem 0 0 0;
+            }
+            
+            .screens-container {
+                padding: 0.4rem;
+                gap: 0.4rem;
+                flex: 1;
+                min-height: 0;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .device {
+                max-height: none;
+                height: auto;
+                min-height: 0;
+                flex: 1 1 33.333%;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            
+            .device-header {
+                padding: 0.4rem;
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+            
+            .device-title {
+                font-size: 0.75rem;
+                gap: 0.2rem;
+            }
+            
+            .device-title span {
+                font-weight: bold;
+            }
+            
+            .device-status {
+                font-size: 0.65rem;
+            }
+            
+            .status-dot {
+                width: 6px;
+                height: 6px;
+            }
+            
+            .mobile-messages {
+                padding: 0.4rem;
+                min-height: 80px;
+                flex: 1;
+                overflow-y: auto;
+            }
+            
+            .message {
+                margin-bottom: 0.6rem;
+            }
+            
+            .message-bubble {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+                max-width: 85%;
+            }
+            
+            .message-info {
+                font-size: 0.55rem;
+                gap: 0.3rem;
+            }
+            
+            .sentiment-badge {
+                padding: 0.1rem 0.25rem;
+                font-size: 0.5rem;
+            }
+            
+            .mobile-input {
+                padding: 0.35rem;
+                flex-shrink: 0;
+                min-height: 45px;
+            }
+            
+            .input-group {
+                gap: 0.4rem;
+            }
+            
+            .form-control {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .btn-send {
+                width: 1.8rem;
+                height: 1.8rem;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+            
+            .processing-log {
+                padding: 0.4rem;
+                font-size: 0.65rem;
+                flex: 1;
+                overflow-y: auto;
+            }
+            
+            .log-entry {
+                padding: 0.25rem;
+                margin-bottom: 0.3rem;
+                border-left-width: 2px;
+            }
+            
+            .log-time {
+                font-size: 0.55rem;
+            }
+            
+            .log-message {
+                font-size: 0.65rem;
+                margin-top: 0.1rem;
+            }
+            
+            .log-message i {
+                font-size: 0.6rem;
+            }
+            
+            .server-stats {
+                padding: 0.35rem;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.25rem;
+                flex-shrink: 0;
+            }
+            
+            .stat-item {
+                padding: 0.25rem;
+                font-size: 0.65rem;
+            }
+            
+            .stat-value {
+                font-size: 0.95rem;
+                font-weight: bold;
+            }
+            
+            .stat-name {
+                font-size: 0.5rem;
+                margin-top: 0.1rem;
+            }
+            
+            .bot-responses {
+                padding: 0.4rem;
+                flex: 1;
+                overflow-y: auto;
+                font-size: 0.75rem;
+            }
+            
+            .response-item {
+                padding: 0.4rem;
+                margin-bottom: 0.4rem;
+                border-left-width: 3px;
+            }
+            
+            .response-header {
+                margin-bottom: 0.2rem;
+                font-size: 0.7rem;
+            }
+            
+            .response-sentiment {
+                padding: 0.15rem 0.3rem;
+                font-size: 0.55rem;
+            }
+            
+            .response-time {
+                font-size: 0.55rem;
+            }
+            
+            .response-text {
+                font-size: 0.7rem;
+                margin: 0.25rem 0;
+                line-height: 1.2;
+            }
+            
+            .bot-thinking {
+                padding: 0.4rem;
+                font-size: 0.75rem;
+                gap: 0.3rem;
+            }
+            
+            .thinking-dots {
+                gap: 0.15rem;
+            }
+            
+            .thinking-dots .dot {
+                width: 5px;
+                height: 5px;
+            }
+            
+            .current-sentiment {
+                padding: 0.35rem;
+                flex-shrink: 0;
+                border-top-width: 1px;
+            }
+            
+            .sentiment-display {
+                font-size: 1.3rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .sentiment-label {
+                font-size: 0.75rem;
+            }
+            
+            .connection-arrows {
+                display: none !important;
+            }
+            
+            .welcome-message {
+                padding: 1rem 0.5rem;
+            }
+            
+            .welcome-message i {
+                font-size: 1.3rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .welcome-message p {
+                font-size: 0.8rem;
+                margin: 0.5rem 0;
+            }
+            
+            .welcome-message small {
+                font-size: 0.65rem;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.1rem;
+            }
+            
+            .header p {
+                font-size: 0.75rem;
+                margin: 0.15rem 0 0 0;
+            }
+            
+            .header {
+                padding: 0.4rem;
+            }
+            
+            .device {
+                flex: 1 1 33.333%;
+            }
+            
+            .device-header {
+                padding: 0.3rem;
+                font-size: 0.8rem;
+            }
+            
+            .device-title {
+                font-size: 0.7rem;
+            }
+            
+            .mobile-messages {
+                padding: 0.3rem;
+            }
+            
+            .message-bubble {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.7rem;
+            }
+            
+            .mobile-input {
+                padding: 0.3rem;
+                min-height: 42px;
+            }
+            
+            .form-control {
+                padding: 0.3rem 0.45rem;
+                font-size: 0.7rem;
+            }
+            
+            .btn-send {
+                width: 1.6rem;
+                height: 1.6rem;
+                font-size: 0.75rem;
+            }
+            
+            .processing-log {
+                padding: 0.3rem;
+                font-size: 0.6rem;
+            }
+            
+            .server-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 0.3rem;
+                gap: 0.2rem;
+            }
+            
+            .stat-item {
+                padding: 0.2rem;
+                font-size: 0.6rem;
+            }
+            
+            .stat-value {
+                font-size: 0.85rem;
+            }
+            
+            .stat-name {
+                font-size: 0.45rem;
+            }
+            
+            .bot-responses {
+                padding: 0.3rem;
+                font-size: 0.7rem;
+            }
+            
+            .response-item {
+                padding: 0.3rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .response-text {
+                font-size: 0.65rem;
+            }
+            
+            .sentiment-display {
+                font-size: 1rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .main-container {
+                height: 100vh;
+                overflow: hidden;
+            }
+            
+            .header h1 {
+                font-size: 1rem;
+            }
+            
+            .header p {
+                font-size: 0.7rem;
+            }
+            
+            .header {
+                padding: 0.35rem 0.3rem;
+            }
+            
+            .screens-container {
+                padding: 0.3rem;
+                gap: 0.3rem;
+            }
+            
+            .device {
+                flex: 1 1 33.333%;
+                min-height: 0;
+            }
+            
+            .device-header {
+                padding: 0.25rem;
+                font-size: 0.75rem;
+            }
+            
+            .device-title {
+                font-size: 0.65rem;
+                gap: 0.15rem;
+            }
+            
+            .device-status {
+                font-size: 0.6rem;
+            }
+            
+            .mobile-messages {
+                padding: 0.25rem;
+                min-height: 70px;
+            }
+            
+            .message {
+                margin-bottom: 0.4rem;
+            }
+            
+            .message-bubble {
+                padding: 0.3rem 0.4rem;
+                font-size: 0.65rem;
+                max-width: 90%;
+            }
+            
+            .message-info {
+                font-size: 0.5rem;
+            }
+            
+            .sentiment-badge {
+                padding: 0.08rem 0.2rem;
+                font-size: 0.45rem;
+            }
+            
+            .mobile-input {
+                padding: 0.25rem;
+                min-height: 38px;
+            }
+            
+            .form-control {
+                padding: 0.25rem 0.4rem;
+                font-size: 0.65rem;
+            }
+            
+            .btn-send {
+                width: 1.5rem;
+                height: 1.5rem;
+                font-size: 0.7rem;
+            }
+            
+            .processing-log {
+                padding: 0.25rem;
+                font-size: 0.55rem;
+            }
+            
+            .log-entry {
+                padding: 0.2rem;
+                margin-bottom: 0.2rem;
+            }
+            
+            .log-message {
+                font-size: 0.6rem;
+            }
+            
+            .server-stats {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 0.25rem;
+                gap: 0.15rem;
+            }
+            
+            .stat-item {
+                padding: 0.15rem;
+                font-size: 0.55rem;
+            }
+            
+            .stat-value {
+                font-size: 0.8rem;
+            }
+            
+            .stat-name {
+                font-size: 0.4rem;
+            }
+            
+            .bot-responses {
+                padding: 0.25rem;
+                font-size: 0.65rem;
+            }
+            
+            .response-item {
+                padding: 0.3rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .response-text {
+                font-size: 0.6rem;
+            }
+            
+            .sentiment-display {
+                font-size: 0.9rem;
+            }
+            
+            .sentiment-label {
+                font-size: 0.65rem;
+            }
+            
+            .welcome-message {
+                padding: 0.6rem 0.3rem;
+            }
+            
+            .welcome-message i {
+                font-size: 1rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .welcome-message p {
+                font-size: 0.7rem;
+                margin: 0.3rem 0;
+            }
+            
+            .welcome-message small {
+                font-size: 0.6rem;
+            }
+        }
+
+        @@media (max-width: 360px) {
+            .header h1 {
+                font-size: 0.9rem;
+            }
+            
+            .header p {
+                display: none;
+            }
+            
+            .device-title span {
+                display: none;
+            }
+            
+            .device-status {
+                font-size: 0.5rem;
+            }
+            
+            .mobile-messages {
+                font-size: 0.6rem;
+            }
+            
+            .message-bubble {
+                font-size: 0.55rem;
+            }
+            
+            .form-control {
+                font-size: 0.55rem;
+            }
+        }
+
         .current-sentiment {
             background: rgba(111, 66, 193, 0.1);
-            padding: 1rem;
+            padding: 0.75rem;
             border-top: 1px solid var(--border-color);
             text-align: center;
         }
@@ -674,8 +1271,28 @@
             document.getElementById('neutralCount').textContent = stats.neutral;
         }
 
+        function getMessageRoleClass(sender) {
+            return sender === 'Bot' ? 'bot' : 'user';
+        }
+
+        function getSentimentKey(sentiment) {
+            const normalized = sentiment ? sentiment.toLowerCase() : '';
+            if (normalized.includes('positive')) return 'positive';
+            if (normalized.includes('negative')) return 'negative';
+            if (normalized.includes('neutral')) return 'neutral';
+            return 'neutral';
+        }
+
+        function getSentimentClass(sentiment) {
+            const normalized = sentiment ? sentiment.toLowerCase() : 'neutral';
+            if (normalized.includes('positive')) return 'sentiment-positive';
+            if (normalized.includes('negative')) return 'sentiment-negative';
+            if (normalized.includes('neutral')) return 'sentiment-neutral';
+            return 'sentiment-neutral';
+        }
+
         // Add message to mobile screen
-        function addMobileMessage(message) {
+        function addMobileMessage(message, isPlaceholder = false) {
             const mobileMessages = document.getElementById('mobileMessages');
             
             // Remove welcome message if it exists
@@ -683,11 +1300,33 @@
             if (welcomeMsg) {
                 welcomeMsg.remove();
             }
+
+            const existingMessage = mobileMessages.querySelector(`[data-message-id="${message.id}"]`);
+            const sentimentClass = getSentimentClass(message.sentiment);
+            const sentimentText = isPlaceholder ? `${message.sentimentEmoji} Analyzing...` : `${message.sentimentEmoji} ${message.sentiment}`;
+
+            if (existingMessage) {
+                existingMessage.className = `message ${getMessageRoleClass(message.sender)}`;
+                existingMessage.dataset.messageId = message.id;
+                existingMessage.innerHTML = `
+                    <div class="message-bubble">
+                        <div>${message.text}</div>
+                        <div class="message-info">
+                            <span>${message.sender}</span>
+                            <span>${new Date(message.timestamp).toLocaleTimeString()}</span>
+                            <span class="sentiment-badge ${sentimentClass}">
+                                ${sentimentText}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                mobileMessages.scrollTop = mobileMessages.scrollHeight;
+                return;
+            }
             
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.sender.toLowerCase()}`;
-            
-            const sentimentClass = `sentiment-${message.sentiment.toLowerCase()}`;
+            messageDiv.className = `message ${getMessageRoleClass(message.sender)}${isPlaceholder ? ' placeholder' : ''}`;
+            messageDiv.dataset.messageId = message.id;
             
             messageDiv.innerHTML = `
                 <div class="message-bubble">
@@ -696,7 +1335,7 @@
                         <span>${message.sender}</span>
                         <span>${new Date(message.timestamp).toLocaleTimeString()}</span>
                         <span class="sentiment-badge ${sentimentClass}">
-                            ${message.sentimentEmoji} ${message.sentiment}
+                            ${sentimentText}
                         </span>
                     </div>
                 </div>
@@ -742,6 +1381,11 @@
             
             serverLog.appendChild(entry);
             serverLog.scrollTop = serverLog.scrollHeight;
+            
+            // Keep only last 20 log entries
+            while (serverLog.children.length > 20) {
+                serverLog.removeChild(serverLog.firstChild);
+            }
         }
 
         // Add response to bot screen
@@ -754,10 +1398,11 @@
                 welcomeMsg.remove();
             }
             
-            const responseDiv = document.createElement('div');
-            responseDiv.className = `response-item ${message.sentiment.toLowerCase()}`;
+            const sentimentKey = getSentimentKey(message.sentiment);
+            const sentimentClass = getSentimentClass(message.sentiment);
             
-            const sentimentClass = `sentiment-${message.sentiment.toLowerCase()}`;
+            const responseDiv = document.createElement('div');
+            responseDiv.className = `response-item ${sentimentKey}`;
             
             responseDiv.innerHTML = `
                 <div class="response-header">
@@ -782,37 +1427,48 @@
             console.log('Received message:', message);
             
             if (message.sender === 'Mobile User') {
-                // Add to mobile screen
+                // Add to mobile screen immediately
                 addMobileMessage(message);
                 
-                // Add processing log to server
+                // Show processing on server
                 addServerLog({
-                    text: `Received from Mobile: "${message.text}"`
+                    text: `📱 Received from Mobile: "${message.text}"`
                 }, 'processing');
                 
-                // Update server stats
-                stats.total++;
-                stats[message.sentiment.toLowerCase()]++;
-                updateServerStats();
+                // Show bot thinking
+                document.getElementById('botThinking').classList.add('active');
                 
-                // Add final sentiment log to server
+                // Simulate server processing
                 setTimeout(() => {
-                    addServerLog(message, message.sentiment.toLowerCase());
-                }, 500);
+                    // Update server stats
+                    stats.total++;
+                    const sentimentKey = getSentimentKey(message.sentiment);
+                    if (stats.hasOwnProperty(sentimentKey)) {
+                        stats[sentimentKey]++;
+                    }
+                    updateServerStats();
+                    
+                    // Show sentiment analysis complete
+                    addServerLog(message, sentimentKey);
+                    
+                    // Update bot current sentiment
+                    document.getElementById('currentSentimentEmoji').textContent = message.sentimentEmoji;
+                    document.getElementById('currentSentimentLabel').textContent = message.sentiment;
+                }, 1000);
                 
             } else if (message.sender === 'Bot') {
-                // Hide bot thinking indicator
+                // Hide bot thinking
                 document.getElementById('botThinking').classList.remove('active');
                 
-                // Add to mobile screen
+                // Add bot response to mobile screen
                 addMobileMessage(message);
                 
-                // Add to bot screen
+                // Add bot response to bot screen
                 addBotResponse(message);
                 
-                // Add to server log
+                // Log bot response on server
                 addServerLog({
-                    text: `Bot response: "${message.text}"`
+                    text: `🤖 Bot Response: "${message.text}" (${message.sentiment})`
                 }, 'info');
             }
         });
@@ -834,8 +1490,8 @@
                 confidence: 0
             };
             
-            // Add message immediately to mobile UI
-            addMobileMessage(message);
+            // Add placeholder message while waiting for sentiment analysis
+            addMobileMessage(message, true);
             input.value = '';
             
             try {

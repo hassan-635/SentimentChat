@@ -306,6 +306,499 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-secondary);
         }
+
+        /* Responsive Design */
+        @@media (max-width: 1400px) {
+            .bot-header {
+                padding: 0.8rem;
+            }
+            
+            .bot-title h5 {
+                font-size: 1.3rem;
+            }
+            
+            .bot-content {
+                gap: 0.8rem;
+                padding: 0.8rem;
+            }
+        }
+
+        @@media (max-width: 1200px) {
+            .bot-header {
+                padding: 0.7rem;
+            }
+            
+            .bot-title {
+                gap: 0.6rem;
+            }
+            
+            .bot-title h5 {
+                font-size: 1rem;
+            }
+            
+            .bot-content {
+                gap: 0.6rem;
+                padding: 0.6rem;
+                flex-direction: column;
+            }
+            
+            .sentiment-panel {
+                flex: 1 !important;
+                padding: 0.8rem;
+            }
+            
+            .response-panel {
+                flex: 2 !important;
+                min-height: 350px;
+            }
+        }
+
+        @@media (max-width: 1024px) {
+            .bot-content {
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+            
+            .response-panel {
+                min-height: 300px;
+            }
+            
+            .bot-responses {
+                padding: 0.6rem;
+            }
+            
+            .bot-title i {
+                font-size: 1.5rem;
+            }
+            
+            .response-item {
+                padding: 0.8rem;
+                margin-bottom: 0.6rem;
+            }
+            
+            .response-sentiment {
+                font-size: 0.75rem;
+            }
+            
+            .response-text {
+                font-size: 0.9rem;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .bot-container {
+                height: 100vh;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .bot-header {
+                padding: 0.5rem;
+                border-bottom-width: 1px;
+                flex-direction: column;
+                gap: 0.4rem;
+                align-items: flex-start;
+            }
+            
+            .bot-title {
+                width: 100%;
+                gap: 0.4rem;
+            }
+            
+            .bot-title i {
+                font-size: 1.2rem;
+            }
+            
+            .bot-title h5 {
+                font-size: 0.95rem;
+                margin: 0;
+            }
+            
+            .bot-title small {
+                font-size: 0.7rem;
+            }
+            
+            .bot-status {
+                width: 100%;
+                justify-content: space-between;
+                font-size: 0.75rem;
+            }
+            
+            .status-light {
+                width: 10px;
+                height: 10px;
+            }
+            
+            .bot-content {
+                flex: 1;
+                gap: 0.4rem;
+                padding: 0.4rem;
+                overflow: hidden;
+                flex-direction: column;
+            }
+            
+            .response-panel {
+                flex: 1;
+                min-height: 0;
+                border-radius: 0.4rem;
+            }
+            
+            .sentiment-panel {
+                flex: 0 0 auto;
+                padding: 0.6rem;
+                border-radius: 0.4rem;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            
+            .panel-header {
+                padding: 0.5rem 0.7rem;
+                font-size: 0.8rem;
+            }
+            
+            .panel-header i {
+                font-size: 0.8rem;
+            }
+            
+            .bot-responses {
+                padding: 0.5rem;
+                flex: 1;
+                overflow-y: auto;
+            }
+            
+            .response-item {
+                padding: 0.6rem;
+                margin-bottom: 0.5rem;
+                border-left-width: 3px;
+                font-size: 0.8rem;
+            }
+            
+            .response-header {
+                margin-bottom: 0.3rem;
+                font-size: 0.75rem;
+            }
+            
+            .response-sentiment {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.65rem;
+            }
+            
+            .response-time {
+                font-size: 0.65rem;
+            }
+            
+            .response-text {
+                font-size: 0.8rem;
+                margin: 0.3rem 0;
+                line-height: 1.3;
+            }
+            
+            .response-meta {
+                gap: 0.5rem;
+                font-size: 0.7rem;
+            }
+            
+            .bot-thinking {
+                padding: 0.6rem;
+                gap: 0.4rem;
+                font-size: 0.75rem;
+                margin-bottom: 0.5rem;
+                border-left: 3px solid var(--bot-accent);
+            }
+            
+            .thinking-dots .dot {
+                width: 6px;
+                height: 6px;
+            }
+            
+            .sentiment-display {
+                padding: 1rem 0.5rem;
+                text-align: center;
+            }
+            
+            .current-sentiment {
+                font-size: 2rem;
+                margin-bottom: 0.4rem;
+            }
+            
+            .sentiment-label {
+                font-size: 1rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .sentiment-description {
+                font-size: 0.75rem;
+            }
+            
+            .response-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+            
+            .stat-item {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .stat-value {
+                font-size: 1rem;
+            }
+            
+            .stat-name {
+                font-size: 0.65rem;
+                margin-top: 0.1rem;
+            }
+            
+            .bot-avatar {
+                width: 45px;
+                height: 45px;
+                margin: 0 auto 0.5rem;
+            }
+            
+            .bot-avatar i {
+                font-size: 1.1rem;
+            }
+            
+            .text-center h6 {
+                font-size: 0.9rem;
+                margin: 0.3rem 0;
+            }
+            
+            .text-center p {
+                font-size: 0.8rem;
+                margin: 0.2rem 0;
+            }
+            
+            .text-center small {
+                font-size: 0.65rem;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .bot-header {
+                padding: 0.4rem;
+            }
+            
+            .bot-title i {
+                font-size: 1rem;
+            }
+            
+            .bot-title h5 {
+                font-size: 0.85rem;
+            }
+            
+            .bot-title small {
+                font-size: 0.6rem;
+            }
+            
+            .bot-status {
+                font-size: 0.65rem;
+            }
+            
+            .bot-content {
+                gap: 0.3rem;
+                padding: 0.3rem;
+            }
+            
+            .response-panel {
+                border-radius: 0.3rem;
+            }
+            
+            .sentiment-panel {
+                padding: 0.5rem;
+                border-radius: 0.3rem;
+            }
+            
+            .panel-header {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.7rem;
+            }
+            
+            .response-item {
+                padding: 0.5rem;
+                margin-bottom: 0.4rem;
+                font-size: 0.75rem;
+            }
+            
+            .sentiment-display {
+                padding: 0.8rem 0.3rem;
+            }
+            
+            .current-sentiment {
+                font-size: 1.6rem;
+            }
+            
+            .sentiment-label {
+                font-size: 0.9rem;
+            }
+            
+            .sentiment-description {
+                font-size: 0.7rem;
+            }
+            
+            .response-stats {
+                gap: 0.4rem;
+                margin-top: 0.4rem;
+            }
+            
+            .stat-item {
+                padding: 0.4rem;
+                font-size: 0.65rem;
+            }
+            
+            .stat-value {
+                font-size: 0.9rem;
+            }
+            
+            .bot-avatar {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .bot-avatar i {
+                font-size: 1rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .bot-header {
+                padding: 0.3rem;
+                gap: 0.3rem;
+            }
+            
+            .bot-title {
+                width: 100%;
+                gap: 0.3rem;
+            }
+            
+            .bot-title i {
+                font-size: 0.9rem;
+            }
+            
+            .bot-title h5 {
+                font-size: 0.75rem;
+            }
+            
+            .bot-title small {
+                display: none;
+            }
+            
+            .bot-status {
+                width: 100%;
+                font-size: 0.6rem;
+            }
+            
+            .bot-content {
+                gap: 0.25rem;
+                padding: 0.25rem;
+            }
+            
+            .panel-header {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.65rem;
+            }
+            
+            .bot-responses {
+                padding: 0.3rem;
+            }
+            
+            .response-item {
+                padding: 0.4rem;
+                margin-bottom: 0.3rem;
+                font-size: 0.7rem;
+            }
+            
+            .response-sentiment {
+                padding: 0.15rem 0.4rem;
+                font-size: 0.6rem;
+            }
+            
+            .response-text {
+                font-size: 0.7rem;
+                margin: 0.2rem 0;
+            }
+            
+            .sentiment-display {
+                padding: 0.6rem 0.3rem;
+            }
+            
+            .current-sentiment {
+                font-size: 1.4rem;
+            }
+            
+            .sentiment-label {
+                font-size: 0.8rem;
+            }
+            
+            .sentiment-description {
+                font-size: 0.65rem;
+            }
+            
+            .response-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.3rem;
+                margin-top: 0.3rem;
+            }
+            
+            .stat-item {
+                padding: 0.3rem;
+                font-size: 0.6rem;
+            }
+            
+            .stat-value {
+                font-size: 0.8rem;
+            }
+            
+            .stat-name {
+                font-size: 0.55rem;
+            }
+            
+            .bot-avatar {
+                width: 35px;
+                height: 35px;
+                margin: 0 auto 0.3rem;
+            }
+            
+            .bot-avatar i {
+                font-size: 0.8rem;
+            }
+        }
+
+        @@media (max-width: 360px) {
+            .bot-title h5 {
+                font-size: 0.65rem;
+            }
+            
+            .bot-title i {
+                display: none;
+            }
+            
+            .bot-status {
+                font-size: 0.55rem;
+            }
+            
+            .panel-header {
+                font-size: 0.6rem;
+            }
+            
+            .panel-header i {
+                display: none;
+            }
+            
+            .response-item {
+                font-size: 0.65rem;
+            }
+            
+            .current-sentiment {
+                font-size: 1.2rem;
+            }
+            
+            .sentiment-label {
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
