@@ -1442,6 +1442,7 @@
                 setTimeout(() => {
                     // Update server stats
                     stats.total++;
+
                     const sentimentKey = getSentimentKey(message.sentiment);
                     if (stats.hasOwnProperty(sentimentKey)) {
                         stats[sentimentKey]++;
